@@ -1,0 +1,10 @@
+<use name=FWCore/Framework>
+<use name=FWCore/EDProduct>
+<use name=FWCore/ParameterSet>
+<use name=RecoLocalTracker/SiStripRecHitConverter>
+<use name=clhep>
+<use name=boost>
+
+<flags SEAL_PLUGIN_NAME="testGeometryTrackerSimAlgo">
+<library file=*.cc name=testGeometryTrackerSimAlgo>
+</library>
