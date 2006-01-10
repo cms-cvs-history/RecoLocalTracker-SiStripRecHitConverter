@@ -5,6 +5,6 @@
 <use name=clhep>
 <use name=boost>
 
-<flags SEAL_PLUGIN_NAME="testGeometryTrackerSimAlgo">
-<library file=*.cc name=testGeometryTrackerSimAlgo>
+<flags SEAL_PLUGIN_NAME="ReadRecHit">
+<library file=*.cc name=ReadRecHit>
 </library>
