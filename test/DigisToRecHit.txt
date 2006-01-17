@@ -32,6 +32,6 @@ process PROD = {
                 string ClusterProducer = "ThreeThresholdClusterizer"
         }
 
-        path p = {ThreeThresholdClusterizer, LocalMeasurementConverter,out}
+        path p = {ThreeThresholdClusterizer, LocalMeasurementConverter}
 }
 
