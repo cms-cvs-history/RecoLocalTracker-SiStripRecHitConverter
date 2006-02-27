@@ -1,41 +1,48 @@
-process PROD = {
+process Clusterizer = {
 
 	source = PoolSource { 
 	       untracked string fileName = "DigisToDigis.root"
-	       int32 MaxEvents = -1
+	       untracked int32 maxEvents = 20
 	}
 
         module out = PoolOutputModule {
-               untracked string fileName = 'ClusterstoRecHit.root'
+              untracked string fileName = 'ClusterstoRecHit.root'
+        }
+
+	module ThreeThresholdClusterizer =  SiStripClusterizer {
+		string DigiProducer = "stripdigi"
+		string ClusterMode = "ThreeThresholdClusterizer"
+		double ChannelThreshold = 2.0
+		double SeedThreshold = 3.0
+		double ClusterThreshold = 2.0
 	}
-
-       es_source = XMLIdealGeometryESSource {
-                FileInPath GeometryConfiguration="Geometry/TrackerSimData/data/trackerSimConfiguration.xml"
-		string rootNodeName = ""
+ 	es_source magfield = XMLIdealGeometryESSource {
+                    FileInPath GeometryConfiguration ="SimG4Core/Application/test/FieldConfiguration.xml"
+                    #the proper root node is set in the xml file
+                    string rootNodeName=""
+        }
+        es_module = VolumeBasedMagneticFieldESProducer {
+                     double findVolumeTolerance = 0.0
+                     untracked bool cacheLastVolume = true
+                     untracked bool timerOn = false
         }
 
-        es_module = TrackerGeometricDetESModule {
+        es_source = XMLIdealGeometryESSource {
+               FileInPath GeometryConfiguration = "Geometry/TrackerSimData/data/trackerSimConfiguration.xml"
+               #the proper root node is set in the xml file
+               string rootNodeName = ""
         }
 
-        es_module = TrackerDigiGeometryESModule {
-        }
-        module ThreeThresholdClusterizer =  SiStripClusterizer {
-                untracked int32 VerbosityLevel = 1
-                string DigiProducer = "StripDigiConverter"
-                string ClusterMode = "ThreeThresholdClusterizer"
-                double ChannelThreshold = 2.0
-                double SeedThreshold = 3.0
-                double ClusterThreshold = 2.0
-        }
+        es_module = TrackerGeometricDetESModule {}
+        es_module = TrackerDigiGeometryESModule {}
         module LocalMeasurementConverter =  SiStripRecHitConverter{
                 untracked int32 VerbosityLevel = 1
+		double TanLorentzAnglePerTesla=0.106
                 string ClusterProducer = "ThreeThresholdClusterizer"
         }
-        module ReadLocalMeasurement =  ReadRecHit{
+       module ReadLocalMeasurement =  ReadRecHit{
                 untracked int32 VerbosityLevel = 1
                 string RecHitProducer = "LocalMeasurementConverter"
         }
-
-        path p = {ThreeThresholdClusterizer, LocalMeasurementConverter, ReadLocalMeasurement}
+	path p = { ThreeThresholdClusterizer,LocalMeasurementConverter,ReadLocalMeasurement}
 }
-
