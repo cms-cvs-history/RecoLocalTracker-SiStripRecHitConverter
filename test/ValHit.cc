@@ -142,11 +142,11 @@ namespace cms
     }
     
     //first instance tracking geometry
-    edm::ESHandle<TrackingGeometry> pDD;
+    edm::ESHandle<TrackerGeometry> pDD;
     es.get<TrackerDigiGeometryRecord> ().get (pDD);
     
     // loop over detunits
-    for(TrackingGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
+    for(TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
       uint32_t myid=((*it)->geographicalId()).rawId();       
       DetId detid = ((*it)->geographicalId());
 
