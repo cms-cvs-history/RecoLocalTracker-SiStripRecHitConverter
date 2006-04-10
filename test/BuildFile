@@ -2,10 +2,14 @@
 <use name=DataFormats/Common>
 <use name=FWCore/ParameterSet>
 <use name=RecoLocalTracker/SiStripRecHitConverter>
+<use name=SimDataFormats/TrackerDigiSimLink>
 <use name=clhep>
 <use name=boost>
 <use name=root>
 
-<flags SEAL_PLUGIN_NAME="ReadRecHit">
-<library file=*.cc name=ReadRecHit>
+
+<library file="*.cc" name=RecoLocalTrackerSiStripRecHitConverterTestModules>
+<flags  SEAL_PLUGIN_NAME="RecoLocalTrackerSiStripRecHitConverterTestModules">
 </library>
+
+
