@@ -24,6 +24,8 @@
 //--- for StripDigiSimLink
 #include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLink.h"
 #include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLinkCollection.h"
+//new
+#include "RecoLocalTracker/SiStripRecHitConverter/test/SiStripHitAssociator.h"
 
 //--- framework stuff
 #include "FWCore/Framework/interface/Handle.h"
@@ -193,6 +195,10 @@ namespace cms
 	clusizsas[i] =0;
 	cluchgrphi[i] =0;
 	cluchgsas[i] =0;
+	rechitrphires[i]=-999.;
+	rechitsasres[i]=-999.;
+	rechitrphimatch[i]=0;
+	rechitrphimatch[i]=0;
 	//tree vars	
 	Tibsimhitx[i]=0;
 	Tibsimhity[i]=0;
@@ -203,14 +209,16 @@ namespace cms
 	Tibrphiy[i]=0;
 	Tibrphiz[i]=0;
 	Tibrphiphi[i]=0;
-	Tibrphires[i]=0;
+	Tibrphires[i]=-999.;
+	Tibrphimatch[i]=0;
 	Tibrphisiz[i]=0;
 	Tibrphichg[i]=0;
 	Tibsasx[i]=0;
 	Tibsasy[i]=0;
 	Tibsasz[i]=0;
 	Tibsasphi[i]=0;
-	Tibsasres[i]=0;
+	Tibsasres[i]=-999;
+	Tibsasmatch[i]=0;
 	Tibsassiz[i]=0;
 	Tibsaschg[i]=0;
 	
@@ -223,14 +231,16 @@ namespace cms
 	Tobrphiy[i]=0;
 	Tobrphiz[i]=0;
 	Tobrphiphi[i]=0;
-	Tobrphires[i]=0;
+	Tobrphires[i]=-999;
+	Tobrphimatch[i]=0;
 	Tobrphisiz[i]=0;
 	Tobrphichg[i]=0;
 	Tobsasx[i]=0;
 	Tobsasy[i]=0;
 	Tobsasz[i]=0;
 	Tobsasphi[i]=0;
-	Tobsasres[i]=0;
+	Tobsasres[i]=-999;
+	Tobsasmatch[i]=0;
 	Tobsassiz[i]=0;
 	Tobsaschg[i]=0;	
 
@@ -243,14 +253,16 @@ namespace cms
 	Tidrphiy[i]=0;
 	Tidrphiz[i]=0;
 	Tidrphiphi[i]=0;
-	Tidrphires[i]=0;
+	Tidrphires[i]=-999;
+	Tidrphimatch[i]=0;
 	Tidrphisiz[i]=0;
 	Tidrphichg[i]=0;
 	Tidsasx[i]=0;
 	Tidsasy[i]=0;
 	Tidsasz[i]=0;
 	Tidsasphi[i]=0;
-	Tidsasres[i]=0;
+	Tidsasres[i]=-999;
+	Tidsasmatch[i]=0;
 	Tidsassiz[i]=0;
 	Tidsaschg[i]=0;	
 
@@ -263,18 +275,23 @@ namespace cms
 	Tecrphiy[i]=0;
 	Tecrphiz[i]=0;
 	Tecrphiphi[i]=0;
-	Tecrphires[i]=0;
+	Tecrphimatch[i]=0;
+	Tecrphires[i]=-999;
 	Tecrphisiz[i]=0;
 	Tecrphichg[i]=0;
 	Tecsasx[i]=0;
 	Tecsasy[i]=0;
 	Tecsasz[i]=0;
 	Tecsasphi[i]=0;
-	Tecsasres[i]=0;
+	Tecsasres[i]=-999;
+	Tecsasmatch[i]=0;
 	Tecsassiz[i]=0;
 	Tecsaschg[i]=0;	
       }
 
+
+
+      SiStripHitAssociator  associate(e);
 
       //---get simhit
       std::map<unsigned int, std::vector<PSimHit> >::const_iterator it = SimHitMap.find(myid);
@@ -297,6 +314,7 @@ namespace cms
 	  i++;
 	}
       }
+
       numrechitrphi =0;
       //loop over rechits-rphi in the same subdetector
       SiStripRecHit2DLocalPosCollection::range          rechitrphiRange = rechitsrphi->get(detid);
@@ -328,6 +346,23 @@ namespace cms
 	  rechitrphiphi[i] = position.phi();
 	  clusizrphi[i] = clusiz;
 	  cluchgrphi[i] = totcharge;
+	  //try association here
+	  //--- add matching code here for testing
+
+	  cout << "ValHit ---> try association RPHI! " << endl;
+	  matched.clear();
+	  matched = associate.associateSimpleRecHit(rechit);
+	  if(!matched.empty()){
+	    cout << " detector =  " << myid << " clusize = " << clusiz << " Rechit x= " << position.x() 
+		 << " y = "<< position.y() << " z = " << position.z() << endl;
+	    cout << " matched = " << matched.size() << endl;
+	    for(vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
+	      cout << " hit  ID = " << (*m).trackId() << " Simhit x = " << (*m).localPosition().x() 
+		   << " y = " <<  (*m).localPosition().y() << " z = " <<  (*m).localPosition().x() << endl;
+	    }
+	    rechitrphimatch[i] = 1;
+	    rechitrphires[i] = rechitrphix[i] - matched[0].localPosition().x();
+	  }
 	  i++;
 	}
       }
@@ -361,6 +396,24 @@ namespace cms
 	  rechitsasphi[j] = position.phi();
 	  clusizsas[j] = clusiz;
 	  cluchgsas[j] = totcharge;
+
+	  //try association here
+	  //--- add matching code here for testing
+
+	  cout << "ValHit ---> try association SAS! " << endl;
+	  matched.clear();
+	  matched = associate.associateSimpleRecHit(rechit);
+	  if(!matched.empty()){
+	    cout << " detector = " << myid << " clusize = " << clusiz << " Rechit x = " << position.x() 
+		 << " y = "<< position.y() << " z = " << position.z() << endl;
+	    cout << " matched = " << matched.size() << endl;
+	    for(vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
+	      cout << " hit  ID = " << (*m).trackId() << " Simhit x = " << (*m).localPosition().x() 
+		   << " y = " <<  (*m).localPosition().y() << " z = " <<  (*m).localPosition().x() << endl;
+	    }
+	    rechitsasmatch[j] = 1;
+	    rechitsasres[j] = rechitsasx[j] - matched[0].localPosition().x();
+	  }
 	  j++;
 	}
       }
@@ -409,32 +462,11 @@ namespace cms
 	      Tibrphix[kk] = rechitrphix[kk];
 	      Tibrphiy[kk] = rechitrphiy[kk];
 	      Tibrphiz[kk] = rechitrphiz[kk];
+	      Tibrphires[kk]= rechitrphires[kk];
+	      Tibrphimatch[kk]= rechitrphimatch[kk];
 	      Tibrphisiz[kk] = clusizrphi[kk];
 	      Tibrphichg[kk] = cluchgrphi[kk];
 	    }
-	    // 	  if(numsimhit>0 && numrechitrphi>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitrphi; kk++){
-	    // 		Tibrphires[kk] = rechitrphix[kk]-simhitx[k];
-	    // 		if(tiblayer == 1){
-	    // 		  tibclu1rphi->Fill(clusizrphi[kk]);
-	    // 		  tibres1rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(tiblayer == 2){
-	    // 		  tibclu2rphi->Fill(clusizrphi[kk]);
-	    // 		  tibres2rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(tiblayer == 3){
-	    // 		  tibclu3rphi->Fill(clusizrphi[kk]);
-	    // 		  tibres3rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		  }
-	    // 		if(tiblayer == 4){
-	    // 		  tibclu4rphi->Fill(clusizrphi[kk]);
-	    // 		  tibres4rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }
-	    // 	  }
 	  } else if (tibstereo == 1) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tibsimhitx[k] = simhitx[k];
@@ -447,24 +479,11 @@ namespace cms
 	      Tibsasx[kk] = rechitsasx[kk];
 	      Tibsasy[kk] = rechitsasy[kk];
 	      Tibsasz[kk] = rechitsasz[kk];
+	      Tibsasres[kk]= rechitsasres[kk];
+	      Tibsasmatch[kk]= rechitsasmatch[kk];
 	      Tibsassiz[kk] = clusizsas[kk];
 	      Tibsaschg[kk] = cluchgsas[kk];
 	    }
-	    // 	  if(numsimhit>0 && numrechitsas>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitsas; kk++){
-	    // 		Tibsasres[kk] = rechitsasx[kk]-simhitx[k];
-	    // 		if(tiblayer == 1){
-	    // 		    tibclu1sas->Fill(clusizsas[kk]);
-	    // 		    tibres1sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		  }
-	    // 		if(tiblayer == 2){
-	    // 		  tibclu2sas->Fill(clusizsas[kk]);
-	    // 		  tibres2sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }   
-	    // 	  }
 	  }
 	}
 	if( detid.subdetId() == int( StripSubdetector::TOB)){
@@ -488,40 +507,11 @@ namespace cms
 	      Tobrphix[kk] = rechitrphix[kk];
 	      Tobrphiy[kk] = rechitrphiy[kk];
 	      Tobrphiz[kk] = rechitrphiz[kk];
+	      Tobrphires[kk]= rechitrphires[kk];
+	      Tobrphimatch[kk]= rechitrphimatch[kk];
 	      Tobrphisiz[kk] = clusizrphi[kk];
 	      Tobrphichg[kk] = cluchgrphi[kk];
 	    }	
-	    // 	  if(numsimhit>0 && numrechitrphi>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitrphi; kk++){
-	    // 		Tobrphires[kk] = rechitrphix[kk]-simhitx[k];
-	    // 		if(toblayer == 1){
-	    // 		  tobclu1rphi->Fill(clusizrphi[kk]);
-	    // 		  tobres1rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(toblayer == 2){
-	    // 		  tobclu2rphi->Fill(clusizrphi[kk]);
-	    // 		  tobres2rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(toblayer == 3){
-	    // 		  tobclu3rphi->Fill(clusizrphi[kk]);
-	    // 		  tobres3rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(toblayer == 4){
-	    // 		  tobclu4rphi->Fill(clusizrphi[kk]);
-	    // 		  tobres4rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(toblayer == 5){
-	    // 		  tobclu5rphi->Fill(clusizrphi[kk]);
-	    // 		  tobres5rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(toblayer == 6){
-	    // 		  tobclu6rphi->Fill(clusizrphi[kk]);
-	    // 		  tobres6rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }
-	    // 	  }
 	  } else if (tobstereo == 1) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tobsimhitx[k] = simhitx[k];
@@ -534,23 +524,11 @@ namespace cms
 	      Tobsasx[kk] = rechitsasx[kk];
 	      Tobsasy[kk] = rechitsasy[kk];
 	      Tobsasz[kk] = rechitsasz[kk];
+	      Tobsasres[kk]= rechitsasres[kk];
+	      Tobsasmatch[kk]= rechitsasmatch[kk];
 	      Tobsassiz[kk] = clusizsas[kk];
 	      Tobsaschg[kk] = cluchgsas[kk];
 	    }
-	    // 	  if(numsimhit>0 && numrechitsas>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitsas; kk++){
-	    // 		Tobsasres[kk] = rechitsasx[kk]-simhitx[k];
-	    // 		if(toblayer == 1){
-	    // 		  tobclu1sas->Fill(clusizsas[kk]);
-	    // 		  tobres1sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(toblayer == 2){
-	    // 		  tobclu2sas->Fill(clusizsas[kk]);
-	    // 		  tobres2sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }   
 	  }
 	}
 	
@@ -577,29 +555,11 @@ namespace cms
 	      Tidrphix[kk] = rechitrphix[kk];
 	      Tidrphiy[kk] = rechitrphiy[kk];
 	      Tidrphiz[kk] = rechitrphiz[kk];
+	      Tidrphires[kk]= rechitrphires[kk];
+	      Tidrphimatch[kk]= rechitrphimatch[kk];
 	      Tidrphisiz[kk] = clusizrphi[kk];
 	      Tidrphichg[kk] = cluchgrphi[kk];
 	    }
-	    // 	  if(numsimhit>0 && numrechitrphi>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitrphi; kk++){
-	    // 		Tidrphires[kk] = rechitrphix[kk]-simhitx[k];
-	    // 		if(tidlayer == 1){
-	    // 		  Tidrphires[kk] = rechitrphix[kk]-simhitx[k];
-	    // 		  tidclu1rphi->Fill(clusizrphi[kk]);
-	    // 		  tidres1rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(tidlayer == 2){
-	    // 		  tidclu2rphi->Fill(clusizrphi[kk]);
-	    // 		  tidres2rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(tidlayer == 3){
-	    // 		  tidclu3rphi->Fill(clusizrphi[kk]);
-	    // 		  tidres3rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }
-	    // 	  }
 	  } else if (tidstereo == 1) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tidsimhitx[k] = simhitx[k];
@@ -612,24 +572,11 @@ namespace cms
 	      Tidsasx[kk] = rechitsasx[kk];
 	      Tidsasy[kk] = rechitsasy[kk];
 	      Tidsasz[kk] = rechitsasz[kk];
+	      Tidsasres[kk]= rechitsasres[kk];
+	      Tidsasmatch[kk]= rechitsasmatch[kk];
 	      Tidsassiz[kk] = clusizsas[kk];
 	      Tidsaschg[kk] = cluchgsas[kk];
 	    }
-	    // if(numsimhit>0 && numrechitsas>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitsas; kk++){
-	    // 		Tidsasres[kk] = rechitsasx[kk]-simhitx[k];
-	    // 		if(tidlayer == 1){
-	    // 		  tidclu1sas->Fill(clusizsas[kk]);
-	    // 		  tidres1sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(tidlayer == 2){
-	    // 		  tidclu2sas->Fill(clusizsas[kk]);
-	    // 		  tidres2sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }   
-	    // 	  }
 	  }
 	}
 	if( detid.subdetId() == int(StripSubdetector::TEC)){
@@ -655,44 +602,11 @@ namespace cms
 	      Tecrphix[kk] = rechitrphix[kk];
 	      Tecrphiy[kk] = rechitrphiy[kk];
 	      Tecrphiz[kk] = rechitrphiz[kk];
+	      Tecrphires[kk]= rechitrphires[kk];
+	      Tecrphimatch[kk]= rechitrphimatch[kk];
 	      Tecrphisiz[kk] = clusizrphi[kk];
 	      Tecrphichg[kk] = cluchgrphi[kk];
 	    }
-	    // 	  if(numsimhit>0 && numrechitrphi>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitrphi; kk++){
-	    // 		Tecrphires[kk] = rechitrphix[kk]-simhitx[k];
-	    // 		if(teclayer == 1){
-	    // 		  tecclu1rphi->Fill(clusizrphi[kk]);
-	    // 		  tecres1rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 2){
-	    // 		  tecclu2rphi->Fill(clusizrphi[kk]);
-	    // 		  tecres2rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 3){
-	    // 		  tecclu3rphi->Fill(clusizrphi[kk]);
-	    // 		  tecres3rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 4){
-	    // 		  tecclu4rphi->Fill(clusizrphi[kk]);
-	    // 		  tecres4rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 5){
-	    // 		  tecclu5rphi->Fill(clusizrphi[kk]);
-	    // 		  tecres5rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 6){
-	    // 		  tecclu6rphi->Fill(clusizrphi[kk]);
-	    // 		  tecres6rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 7){
-	    // 		  tecclu7rphi->Fill(clusizrphi[kk]);
-	    // 		  tecres7rphi->Fill(rechitrphix[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }
-	    // 	  }
 	  } else if (tecstereo == 1) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tecsimhitx[k] = simhitx[k];
@@ -705,28 +619,11 @@ namespace cms
 	      Tecsasx[kk] = rechitsasx[kk];
 	      Tecsasy[kk] = rechitsasy[kk];
 	      Tecsasz[kk] = rechitsasz[kk];
+	      Tecsasres[kk]= rechitsasres[kk];
+	      Tecsasmatch[kk]= rechitsasmatch[kk];
 	      Tecsassiz[kk] = clusizsas[kk];
 	      Tecsaschg[kk] = cluchgsas[kk];
 	    }
-	    // 	  if(numsimhit>0 && numrechitsas>0){
-	    // 	    for(int k=0; k<numsimhit; k++){
-	    // 	      for(int kk=0;kk<numrechitsas; kk++){
-	    // 		Tecsasres[kk] = rechitsasx[kk]-simhitx[k];
-	    // 		if(teclayer == 1){
-	    // 		  tecclu1sas->Fill(clusizsas[kk]);
-	    // 		  tecres1sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 2){
-	    // 		  tecclu2sas->Fill(clusizsas[kk]);
-	    // 		  tecres2sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 		if(teclayer == 5){
-	    // 		  tecclu5sas->Fill(clusizsas[kk]);
-	    // 		  tecres5sas->Fill(rechitsasx[kk]-simhitx[k]);
-	    // 		}
-	    // 	      }
-	    // 	    }   
-	    // 	  }
 	  }
 	}
 	myTree->Fill();     
@@ -835,18 +732,21 @@ namespace cms
     myTree->Branch("Tibrphix", &Tibrphix, "Tibrphix[Tibnumrechitrphi]/F"); 
     myTree->Branch("Tibrphiy", &Tibrphiy, "Tibrphiy[Tibnumrechitrphi]/F");
     myTree->Branch("Tibrphiz", &Tibrphiz, "Tibrphiz[Tibnumrechitrphi]/F");
-    myTree->Branch("Tibrphires", &Tibrphires, "Tibrphires[Tibnumrechitrphi]/I");
+    myTree->Branch("Tibrphires", &Tibrphires, "Tibrphires[Tibnumrechitrphi]/F");
+    myTree->Branch("Tibrphimatch", &Tibrphimatch, "Tibrphimatch[Tibnumrechitrphi]/F");
     myTree->Branch("Tibrphisiz", &Tibrphisiz, "Tibrphisiz[Tibnumrechitrphi]/I");
     myTree->Branch("Tibrphichg", &Tibrphichg, "Tibrphichg[Tibnumrechitrphi]/F");
+ 
     Tibnumrechitsas=0;
     myTree->Branch("Tibnumrechitsas", &Tibnumrechitsas, "Tibnumrechitsas/I");
     myTree->Branch("Tibsasx", &Tibsasx, "Tibsasx[Tibnumrechitsas]/F"); 
     myTree->Branch("Tibsasy", &Tibsasy, "Tibsasy[Tibnumrechitsas]/F");
     myTree->Branch("Tibsasz", &Tibsasz, "Tibsasz[Tibnumrechitsas]/F");        
-    myTree->Branch("Tibsasres", &Tibsasres, "Tibsasres[Tibnumrechitsas]/I");
+    myTree->Branch("Tibsasres", &Tibsasres, "Tibsasres[Tibnumrechitsas]/F");
+    myTree->Branch("Tibsasmatch", &Tibsasmatch, "Tibsasmatch[Tibnumrechitsas]/F");
     myTree->Branch("Tibsassiz", &Tibsassiz, "Tibsassiz[Tibnumrechitsas]/I");
     myTree->Branch("Tibsaschg", &Tibsaschg, "Tibsaschg[Tibnumrechitsas]/F");
-
+ 
     //TOB info
     myTree->Branch("Toblayer", &Toblayer, "Toblayer/I");
     myTree->Branch("Tobstereo", &Tobstereo, "Tobstereo/I");
@@ -862,18 +762,20 @@ namespace cms
     myTree->Branch("Tobrphix", &Tobrphix, "Tobrphix[Tobnumrechitrphi]/F"); 
     myTree->Branch("Tobrphiy", &Tobrphiy, "Tobrphiy[Tobnumrechitrphi]/F");
     myTree->Branch("Tobrphiz", &Tobrphiz, "Tobrphiz[Tobnumrechitrphi]/F");
-    myTree->Branch("Tobrphires", &Tobrphires, "Tobrphires[Tobnumrechitrphi]/I");
+    myTree->Branch("Tobrphires", &Tobrphires, "Tobrphires[Tobnumrechitrphi]/F");
+    myTree->Branch("Tobrphimatch", &Tobrphimatch, "Tobrphimatch[Tobnumrechitrphi]/I");
     myTree->Branch("Tobrphisiz", &Tobrphisiz, "Tobrphisiz[Tobnumrechitrphi]/I");
     myTree->Branch("Tobrphichg", &Tobrphichg, "Tobrphichg[Tobnumrechitrphi]/F");
-    Tobnumrechitsas=0;
+     Tobnumrechitsas=0;
     myTree->Branch("Tobnumrechitsas", &Tobnumrechitsas, "Tobnumrechitsas/I");
     myTree->Branch("Tobsasx", &Tobsasx, "Tobsasx[Tobnumrechitsas]/F"); 
     myTree->Branch("Tobsasy", &Tobsasy, "Tobsasy[Tobnumrechitsas]/F");
     myTree->Branch("Tobsasz", &Tobsasz, "Tobsasz[Tobnumrechitsas]/F");        
-    myTree->Branch("Tobsasres", &Tobsasres, "Tobsasres[Tobnumrechitsas]/I");
+    myTree->Branch("Tobsasres", &Tobsasres, "Tobsasres[Tobnumrechitsas]/F");
+    myTree->Branch("Tobsasmatch", &Tobsasmatch, "Tobsasmatch[Tobnumrechitsas]/I");
     myTree->Branch("Tobsassiz", &Tobsassiz, "Tobsassiz[Tobnumrechitsas]/I");
     myTree->Branch("Tobsaschg", &Tobsaschg, "Tobsaschg[Tobnumrechitsas]/F");
-
+ 
     //TID info
     myTree->Branch("Tidlayer", &Tidlayer, "Tidlayer/I");
     myTree->Branch("Tidstereo", &Tidstereo, "Tidstereo/I");
@@ -890,18 +792,20 @@ namespace cms
     myTree->Branch("Tidrphix", &Tidrphix, "Tidrphix[Tidnumrechitrphi]/F"); 
     myTree->Branch("Tidrphiy", &Tidrphiy, "Tidrphiy[Tidnumrechitrphi]/F");
     myTree->Branch("Tidrphiz", &Tidrphiz, "Tidrphiz[Tidnumrechitrphi]/F");
-    myTree->Branch("Tidrphires", &Tidrphires, "Tidrphires[Tidnumrechitrphi]/I");
+    myTree->Branch("Tidrphires", &Tidrphires, "Tidrphires[Tidnumrechitrphi]/F");
+    myTree->Branch("Tidrphimatch", &Tidrphimatch, "Tidrphimatch[Tidnumrechitrphi]/I");
     myTree->Branch("Tidrphisiz", &Tidrphisiz, "Tidrphisiz[Tidnumrechitrphi]/I");
     myTree->Branch("Tidrphichg", &Tidrphichg, "Tidrphichg[Tidnumrechitrphi]/F");
-    Tidnumrechitsas=0;
+     Tidnumrechitsas=0;
     myTree->Branch("Tidnumrechitsas", &Tidnumrechitsas, "Tidnumrechitsas/I");
     myTree->Branch("Tidsasx", &Tidsasx, "Tidsasx[Tidnumrechitsas]/F"); 
     myTree->Branch("Tidsasy", &Tidsasy, "Tidsasy[Tidnumrechitsas]/F");
     myTree->Branch("Tidsasz", &Tidsasz, "Tidsasz[Tidnumrechitsas]/F");        
-    myTree->Branch("Tidsasres", &Tidsasres, "Tidsasres[Tidnumrechitsas]/I");
+    myTree->Branch("Tidsasres", &Tidsasres, "Tidsasres[Tidnumrechitsas]/F");
+    myTree->Branch("Tidsasmatch", &Tidsasmatch, "Tidsasmatch[Tidnumrechitsas]/I");
     myTree->Branch("Tidsassiz", &Tidsassiz, "Tidsassiz[Tidnumrechitsas]/I");
     myTree->Branch("Tidsaschg", &Tidsaschg, "Tidsaschg[Tidnumrechitsas]/F");
-
+ 
     //TEC info
     myTree->Branch("Teclayer", &Teclayer, "Teclayer/I");
     myTree->Branch("Tecstereo", &Tecstereo, "Tecstereo/I");
@@ -918,18 +822,20 @@ namespace cms
     myTree->Branch("Tecrphix", &Tecrphix, "Tecrphix[Tecnumrechitrphi]/F"); 
     myTree->Branch("Tecrphiy", &Tecrphiy, "Tecrphiy[Tecnumrechitrphi]/F");
     myTree->Branch("Tecrphiz", &Tecrphiz, "Tecrphiz[Tecnumrechitrphi]/F");
-    myTree->Branch("Tecrphires", &Tecrphires, "Tecrphires[Tecnumrechitrphi]/I");
+    myTree->Branch("Tecrphires", &Tecrphires, "Tecrphires[Tecnumrechitrphi]/F");
+    myTree->Branch("Tecrphimatch", &Tecrphimatch, "Tecrphimatch[Tecnumrechitrphi]/I");
     myTree->Branch("Tecrphisiz", &Tecrphisiz, "Tecrphisiz[Tecnumrechitrphi]/I");
     myTree->Branch("Tecrphichg", &Tecrphichg, "Tecrphichg[Tecnumrechitrphi]/F");
-    Tecnumrechitsas=0;
+     Tecnumrechitsas=0;
     myTree->Branch("Tecnumrechitsas", &Tecnumrechitsas, "Tecnumrechitsas/I");
     myTree->Branch("Tecsasx", &Tecsasx, "Tecsasx[Tecnumrechitsas]/F"); 
     myTree->Branch("Tecsasy", &Tecsasy, "Tecsasy[Tecnumrechitsas]/F");
     myTree->Branch("Tecsasz", &Tecsasz, "Tecsasz[Tecnumrechitsas]/F");        
-    myTree->Branch("Tecsasres", &Tecsasres, "Tecsasres[Tecnumrechitsas]/I");
+    myTree->Branch("Tecsasres", &Tecsasres, "Tecsasres[Tecnumrechitsas]/F");
+    myTree->Branch("Tecsasmatch", &Tecsasmatch, "Tecsasmatch[Tecnumrechitsas]/I");
     myTree->Branch("Tecsassiz", &Tecsassiz, "Tecsassiz[Tecnumrechitsas]/I");
     myTree->Branch("Tecsaschg", &Tecsaschg, "Tecsaschg[Tecnumrechitsas]/F");
-
+ 
   }
   
   
