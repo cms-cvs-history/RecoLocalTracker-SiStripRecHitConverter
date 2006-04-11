@@ -32,7 +32,8 @@
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetUnit.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
-                                                                                                                          
+
+#include "RecoLocalTracker/SiStripRecHitConverter/test/SiStripHitAssociator.h"                                                                                                                          
 //needed for the geometry:
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
@@ -63,6 +64,8 @@ class ValHit : public edm::EDAnalyzer
   
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
   
+  std::vector<PSimHit> matched;
+
  private:
   
   edm::ParameterSet conf_;
@@ -87,10 +90,14 @@ class ValHit : public edm::EDAnalyzer
   float rechitrphiy[MAXHIT];
   float rechitrphiz[MAXHIT];
   float rechitrphiphi[MAXHIT];
+  float rechitrphires[MAXHIT];
+  int rechitrphimatch[MAXHIT];
   float rechitsasx[MAXHIT];
   float rechitsasy[MAXHIT];
   float rechitsasz[MAXHIT];
   float rechitsasphi[MAXHIT];
+  float rechitsasres[MAXHIT];
+  int rechitsasmatch[MAXHIT];
   int clusizrphi[MAXHIT];
   int clusizsas[MAXHIT];
   float cluchgrphi[MAXHIT];
@@ -117,7 +124,8 @@ class ValHit : public edm::EDAnalyzer
   float Tibrphiy[MAXHIT];
   float Tibrphiz[MAXHIT];
   float Tibrphiphi[MAXHIT];
-  float Tibrphires[MAXHIT];
+  float Tibrphires[MAXHIT]; 
+  int Tibrphimatch[MAXHIT];
   int Tibrphisiz[MAXHIT];
   float Tibrphichg[MAXHIT];
   float Tibsasx[MAXHIT];
@@ -125,6 +133,7 @@ class ValHit : public edm::EDAnalyzer
   float Tibsasz[MAXHIT];
   float Tibsasphi[MAXHIT];
   float Tibsasres[MAXHIT];
+  int Tibsasmatch[MAXHIT];
   int Tibsassiz[MAXHIT];
   float Tibsaschg[MAXHIT];
 
@@ -143,6 +152,7 @@ class ValHit : public edm::EDAnalyzer
   float Tobrphiz[MAXHIT];
   float Tobrphiphi[MAXHIT];
   float Tobrphires[MAXHIT];
+  int Tobrphimatch[MAXHIT];
   int Tobrphisiz[MAXHIT];
   float Tobrphichg[MAXHIT];
   float Tobsasx[MAXHIT];
@@ -150,6 +160,7 @@ class ValHit : public edm::EDAnalyzer
   float Tobsasz[MAXHIT];
   float Tobsasphi[MAXHIT];
   float Tobsasres[MAXHIT];
+  int Tobsasmatch[MAXHIT];
   int Tobsassiz[MAXHIT];
   float Tobsaschg[MAXHIT];
 
@@ -170,6 +181,7 @@ class ValHit : public edm::EDAnalyzer
   float Tidrphiz[MAXHIT];
   float Tidrphiphi[MAXHIT];
   float Tidrphires[MAXHIT];
+  int Tidrphimatch[MAXHIT];
   int Tidrphisiz[MAXHIT];
   float Tidrphichg[MAXHIT];
   float Tidsasx[MAXHIT];
@@ -177,6 +189,7 @@ class ValHit : public edm::EDAnalyzer
   float Tidsasz[MAXHIT];
   float Tidsasphi[MAXHIT];
   float Tidsasres[MAXHIT];
+  int Tidsasmatch[MAXHIT];
   int Tidsassiz[MAXHIT];
   float Tidsaschg[MAXHIT];
 
@@ -197,6 +210,7 @@ class ValHit : public edm::EDAnalyzer
   float Tecrphiz[MAXHIT];
   float Tecrphiphi[MAXHIT];
   float Tecrphires[MAXHIT];
+  int Tecrphimatch[MAXHIT];
   int Tecrphisiz[MAXHIT];
   float Tecrphichg[MAXHIT];
   float Tecsasx[MAXHIT];
@@ -205,6 +219,7 @@ class ValHit : public edm::EDAnalyzer
   float Tecsasphi[MAXHIT];
   float Tecsasres[MAXHIT];
   int Tecsassiz[MAXHIT];
+  int Tecsasmatch[MAXHIT];
   float Tecsaschg[MAXHIT];
     
   TH1F * tibres1rphi, * tibres2rphi, * tibres3rphi, * tibres4rphi, * tibres1sas, * tibres2sas;
