@@ -51,53 +51,59 @@ namespace cms{
     //get the Detector of the rechit
     DetId detid=  rechit.geographicalId();
     unsigned int detID = detid.rawId();
-    cout << "Associator ---> get Detid " << detID << endl;
+    //    cout << "Associator ---> get Detid " << detID << endl;
     
     //get the range of digis in detid
     linkrange =  stripdigisimlink->get(detID);
-    cout << "Associator ---> get digilink! in Detid " << endl;
-    
-    //get the cluster info
-    const std::vector<const SiStripCluster*> clust=rechit.cluster();
-    cout << "Associator ---> get cluster info " << endl;
-    
-    for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
-      unsigned int clusiz = (*ic)->amplitudes().size();
-      unsigned int first  = (*ic)->firstStrip();     
-      unsigned int last   = first + clusiz;
-      for(StripDigiSimLinkCollection::ContainerIterator linkiter=linkrange.first; linkiter!=linkrange.second;++linkiter){
-	StripDigiSimLink link = *linkiter;
-	if( link.channel() >= first  && link.channel() < last ){
-	  simtrackid.push_back(link.SimTrackId());
+    int numlink=0;
+    StripDigiSimLinkCollection::ContainerIterator linkbegin=linkrange.first;
+    StripDigiSimLinkCollection::ContainerIterator linkend=linkrange.second;
+    numlink = linkend-linkbegin;
+    if(numlink>0){
 
-	  cout << "Associator --> digi list first= " << first << " last = " << last << endl;
-	  cout << "Associator link--> channel= " << link.channel() << "  trackid = " << link.SimTrackId() << endl;
-	}
-      }
-    }
-    
-    //now get the SimHit from the trackid
-    vector<PSimHit> simHit; 
-    std::map<unsigned int, std::vector<PSimHit> >::const_iterator it = SimHitMap.find(detID);
-    simHit.clear();
-    if (it!= SimHitMap.end()){
-      simHit = it->second;
-      vector<PSimHit>::const_iterator simHitIter = simHit.begin();
-      vector<PSimHit>::const_iterator simHitIterEnd = simHit.end();
-      for (;simHitIter != simHitIterEnd; ++simHitIter) {
-	const PSimHit ihit = *simHitIter;
-	unsigned int simHitid = ihit.trackId();
-	for(size_t i=0; i<simtrackid.size();i++){
-	  cout << " Associator -->  check sihit id's = " << simHitid << endl;
-	  if(simHitid == simtrackid[i]){
-	    cout << "Associator ---> ID" << ihit.trackId() << " Simhit x= " << ihit.localPosition().x() 
-		 << " y= " <<  ihit.localPosition().y() << " z= " <<  ihit.localPosition().x() << endl;	    
-	    result.push_back(ihit);
+      //      cout << "Associator ---> get digilink! in Detid n = " << numlink << endl;
+ 
+      //get the cluster info
+      const std::vector<const SiStripCluster*> clust=rechit.cluster();
+      //   cout << "Associator ---> get cluster info " << endl;
+      
+      for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
+	unsigned int clusiz = (*ic)->amplitudes().size();
+	unsigned int first  = (*ic)->firstStrip();     
+	unsigned int last   = first + clusiz;
+	//	cout << "Associator ---> clus size = " << clusiz << " first = " << first << " last = " << last << endl;
+	for(StripDigiSimLinkCollection::ContainerIterator linkiter=linkrange.first; linkiter!=linkrange.second;++linkiter){
+	  StripDigiSimLink link = *linkiter;
+	  if( link.channel() >= first  && link.channel() < last ){
+	    simtrackid.push_back(link.SimTrackId());
+	    //  cout << "Associator --> digi list first= " << first << " last = " << last << endl;
+	    //cout << "Associator link--> channel= " << link.channel() << "  trackid = " << link.SimTrackId() << endl;
 	  }
 	}
       }
-    } 
-    
+      
+      //now get the SimHit from the trackid
+      vector<PSimHit> simHit; 
+      std::map<unsigned int, std::vector<PSimHit> >::const_iterator it = SimHitMap.find(detID);
+      simHit.clear();
+      if (it!= SimHitMap.end()){
+	simHit = it->second;
+	vector<PSimHit>::const_iterator simHitIter = simHit.begin();
+	vector<PSimHit>::const_iterator simHitIterEnd = simHit.end();
+	for (;simHitIter != simHitIterEnd; ++simHitIter) {
+	  const PSimHit ihit = *simHitIter;
+	  unsigned int simHitid = ihit.trackId();
+	  for(size_t i=0; i<simtrackid.size();i++){
+	    //cout << " Associator -->  check sihit id's = " << simHitid << endl;
+	    if(simHitid == simtrackid[i] && simtrackid[i]!= 65535){ //exclude the geant particles. they all have the same id
+	      // cout << "Associator ---> ID" << ihit.trackId() << " Simhit x= " << ihit.localPosition().x() 
+	      //	   << " y= " <<  ihit.localPosition().y() << " z= " <<  ihit.localPosition().x() << endl;	    
+	      result.push_back(ihit);
+	    }
+	  }
+	}
+      } 
+    }
     return result; 
   }
   SiStripHitAssociator::SiStripHitAssociator(const edm::Event& e)  : myEvent_(e)  {
