@@ -1,0 +1,5 @@
+       es_module = StripCPEfromTrackAngleESProducer {
+                string ComponentName = "StripCPEfromTrackAngle"
+                double TanLorentzAnglePerTesla = 0.032
+        }
+
