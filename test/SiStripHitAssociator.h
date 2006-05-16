@@ -18,8 +18,9 @@
 //#include <vector>
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/Handle.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/Common/interface/EDProduct.h"
 
@@ -27,12 +28,13 @@
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 
+#include "DataFormats/Common/interface/DetSetVector.h"
 #include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLink.h"
-#include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLinkCollection.h"
 
 //--- for RecHit
-#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DLocalPos.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DMatchedLocalPos.h"
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+//#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DLocalPos.h"
+//#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DMatchedLocalPos.h"
 
 
 namespace cms{
@@ -44,7 +46,8 @@ namespace cms{
      SiStripHitAssociator(const edm::Event& e);
      virtual ~SiStripHitAssociator(){}
      
-     std::vector<PSimHit> associateSimpleRecHit(const SiStripRecHit2DLocalPos & rechit);
+     //     std::vector<PSimHit> associateSimpleRecHit(const SiStripRecHit2DLocalPos & rechit);
+     std::vector<PSimHit> associateSimpleRecHit(const TrackingRecHit & rechit);
      
      //will do next
      //  vector<const SimHit*> associateMatchedRecHit( const RecHit&) const;
@@ -53,11 +56,10 @@ namespace cms{
      typedef std::map<unsigned int, std::vector<PSimHit> > simhit_map;
      typedef simhit_map::iterator simhit_map_iterator;
      simhit_map SimHitMap;
-     StripDigiSimLinkCollection::Range linkrange;
 
   private:
      const edm::Event& myEvent_;
-     edm::Handle<StripDigiSimLinkCollection> stripdigisimlink;
+     edm::Handle< edm::DetSetVector<StripDigiSimLink> >  stripdigisimlink;
    };  
    
 }
