@@ -23,7 +23,7 @@
 
 //--- for StripDigiSimLink
 #include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLink.h"
-#include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLinkCollection.h"
+
 //new
 #include "RecoLocalTracker/SiStripRecHitConverter/test/SiStripHitAssociator.h"
 
