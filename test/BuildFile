@@ -3,6 +3,7 @@
 <use name=FWCore/ParameterSet>
 <use name=RecoLocalTracker/SiStripRecHitConverter>
 <use name=SimDataFormats/TrackerDigiSimLink>
+<use name=SimTracker/TrackerHitAssociation>
 <use name=clhep>
 <use name=boost>
 <use name=root>
