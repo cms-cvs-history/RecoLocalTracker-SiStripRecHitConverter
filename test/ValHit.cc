@@ -10,45 +10,12 @@
 
 #include "RecoLocalTracker/SiStripRecHitConverter/test/ValHit.h"
 
-//--- for SimHit
-#include "SimDataFormats/TrackingHit/interface/PSimHit.h"
-#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
-
-//--- for RecHit
-#include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
-#include "DataFormats/SiStripCluster/interface/SiStripClusterCollection.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DLocalPosCollection.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DMatchedLocalPosCollection.h"
-#include "DataFormats/Common/interface/OwnVector.h"
-
-//--- for StripDigiSimLink
-#include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLink.h"
-
-//new
-#include "RecoLocalTracker/SiStripRecHitConverter/test/SiStripHitAssociator.h"
-
-//--- framework stuff
-#include "FWCore/Framework/interface/Handle.h"
-#include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
-//--- for Geometry:
-#include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-
 #include "Geometry/Vector/interface/LocalPoint.h"
 #include "Geometry/Vector/interface/GlobalPoint.h"
 
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+#include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
@@ -57,7 +24,6 @@
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetType.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetUnit.h"
-                                                                                                                          
 
 
 //for ntuple tracking
@@ -88,6 +54,8 @@ namespace cms
     
     myRun       = e.id().run();
     myEvent     = e.id().event();
+
+    std::cout << " =========== Event =  " << myEvent << " ================== " << std::endl;
 
     //--- get RecHits
     
@@ -136,6 +104,7 @@ namespace cms
     int numrechitrphi =0;
     int numrechitsas =0;
     int numsimhit =0;
+    int numrechitmatched=0;
       
     SimHitMap.clear();
     for (std::vector<PSimHit>::iterator isim = theStripHits.begin();
@@ -146,7 +115,8 @@ namespace cms
     //first instance tracking geometry
     edm::ESHandle<TrackerGeometry> pDD;
     es.get<TrackerDigiGeometryRecord> ().get (pDD);
-    
+    const TrackerGeometry &tracker(*pDD);
+
     // loop over detunits
     for(TrackerGeometry::DetContainer::const_iterator it = pDD->dets().begin(); it != pDD->dets().end(); it++){
       uint32_t myid=((*it)->geographicalId()).rawId();       
@@ -154,27 +124,32 @@ namespace cms
 
       numrechitrphi =0;
       numrechitsas =0;
+      numrechitmatched=0;
       numsimhit =0;
       Tiblayer =-99;
       Tibstereo=-99; 
       Tibnumsimhit=0;
       Tibnumrechitrphi=0;
       Tibnumrechitsas=0;
+      Tibnumrechitmatched=0;
       Toblayer=-99;
       Tobstereo=-99; 
       Tobnumsimhit=0;
       Tobnumrechitrphi=0;
       Tobnumrechitsas=0;
+      Tobnumrechitmatched=0;
       Tidlayer =-99;
       Tidstereo=-99; 
       Tidnumsimhit=0;
       Tidnumrechitrphi=0;
       Tidnumrechitsas=0;
+      Tidnumrechitmatched=0;
       Teclayer=-99;
       Tecstereo=-99; 
       Tecnumsimhit=0;
       Tecnumrechitrphi=0;
       Tecnumrechitsas=0;
+      Tecnumrechitmatched=0;
       
       // initialize here
       for(int i=0; i<MAXHIT; i++){
@@ -199,6 +174,17 @@ namespace cms
 	rechitsasres[i]=-999.;
 	rechitrphimatch[i]=0;
 	rechitrphimatch[i]=0;
+
+	rechitmatchedx[i] =0;
+	rechitmatchedy[i] =0;
+	rechitmatchedz[i] =0;
+	rechitmatchederrxx[i] =0;
+	rechitmatchederrxy[i] =0;
+	rechitmatchederryy[i] =0;
+	rechitmatchedmatch[i]=0;
+	rechitmatchedresx[i]=0;
+	rechitmatchedresy[i]=0;
+
 	//tree vars	
 	Tibsimhitx[i]=0;
 	Tibsimhity[i]=0;
@@ -221,6 +207,15 @@ namespace cms
 	Tibsasmatch[i]=0;
 	Tibsassiz[i]=0;
 	Tibsaschg[i]=0;
+	Tibmatchedx[i]=0;
+	Tibmatchedy[i]=0;
+	Tibmatchedz[i]=0;
+	Tibmatchederrxx[i]=0;
+	Tibmatchederrxy[i]=0;
+	Tibmatchederryy[i]=0;
+	Tibmatchedresx[i]=-999;	
+	Tibmatchedresy[i]=-999;
+	Tibmatchedmatch[i]=0;
 	
 	Tobsimhitx[i]=0;
 	Tobsimhity[i]=0;
@@ -243,6 +238,15 @@ namespace cms
 	Tobsasmatch[i]=0;
 	Tobsassiz[i]=0;
 	Tobsaschg[i]=0;	
+	Tobmatchedx[i]=0;
+	Tobmatchedy[i]=0;
+	Tobmatchedz[i]=0;
+	Tobmatchederrxx[i]=0;
+	Tobmatchederrxy[i]=0;
+	Tobmatchederryy[i]=0;
+	Tobmatchedresx[i]=-999;	
+	Tobmatchedresy[i]=-999;
+	Tobmatchedmatch[i]=0;
 
 	Tidsimhitx[i]=0;
 	Tidsimhity[i]=0;
@@ -265,6 +269,15 @@ namespace cms
 	Tidsasmatch[i]=0;
 	Tidsassiz[i]=0;
 	Tidsaschg[i]=0;	
+	Tidmatchedx[i]=0;
+	Tidmatchedy[i]=0;
+	Tidmatchedz[i]=0;
+	Tidmatchederrxx[i]=0;
+	Tidmatchederrxy[i]=0;
+	Tidmatchederryy[i]=0;
+	Tidmatchedresx[i]=-999;	
+	Tidmatchedresy[i]=-999;
+	Tidmatchedmatch[i]=0;
 
 	Tecsimhitx[i]=0;
 	Tecsimhity[i]=0;
@@ -287,11 +300,20 @@ namespace cms
 	Tecsasmatch[i]=0;
 	Tecsassiz[i]=0;
 	Tecsaschg[i]=0;	
+	Tecmatchedx[i]=0;
+	Tecmatchedy[i]=0;
+	Tecmatchedz[i]=0;
+	Tecmatchederrxx[i]=0;
+	Tecmatchederrxy[i]=0;
+	Tecmatchederryy[i]=0;
+	Tecmatchedresx[i]=-999;	
+	Tecmatchedresy[i]=-999;
+	Tecmatchedmatch[i]=0;
       }
 
 
 
-      SiStripHitAssociator  associate(e);
+      TrackerHitAssociator  associate(e);
 
       //---get simhit
       std::map<unsigned int, std::vector<PSimHit> >::const_iterator it = SimHitMap.find(myid);
@@ -349,17 +371,17 @@ namespace cms
 	  //try association here
 	  //--- add matching code here for testing
 
-	  cout << "ValHit ---> try association RPHI! " << endl;
+	  //	  cout << "ValHit ---> try association RPHI! " << endl;
 	  matched.clear();
-	  matched = associate.associateSimpleRecHit(rechit);
+	  matched = associate.associateHit(rechit);
 	  if(!matched.empty()){
-	    cout << " detector =  " << myid << " clusize = " << clusiz << " Rechit x= " << position.x() 
-		 << " y = "<< position.y() << " z = " << position.z() << endl;
-	    cout << " matched = " << matched.size() << endl;
-	    for(vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
-	      cout << " hit  ID = " << (*m).trackId() << " Simhit x = " << (*m).localPosition().x() 
-		   << " y = " <<  (*m).localPosition().y() << " z = " <<  (*m).localPosition().x() << endl;
-	    }
+// 	    cout << " detector =  " << myid << " clusize = " << clusiz << " Rechit x= " << position.x() 
+// 		 << " y = "<< position.y() << " z = " << position.z() << endl;
+// 	    cout << " matched = " << matched.size() << endl;
+// 	    for(vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
+// 	      cout << " hit  ID = " << (*m).trackId() << " Simhit x = " << (*m).localPosition().x() 
+// 		   << " y = " <<  (*m).localPosition().y() << " z = " <<  (*m).localPosition().x() << endl;
+// 	    }
 	    rechitrphimatch[i] = 1;
 	    rechitrphires[i] = rechitrphix[i] - matched[0].localPosition().x();
 	  }
@@ -400,55 +422,126 @@ namespace cms
 	  //try association here
 	  //--- add matching code here for testing
 
-	  cout << "ValHit ---> try association SAS! " << endl;
+	  //	  cout << "ValHit ---> try association SAS! " << endl;
 	  matched.clear();
-	  matched = associate.associateSimpleRecHit(rechit);
+	  matched = associate.associateHit(rechit);
 	  if(!matched.empty()){
-	    cout << " detector = " << myid << " clusize = " << clusiz << " Rechit x = " << position.x() 
-		 << " y = "<< position.y() << " z = " << position.z() << endl;
-	    cout << " matched = " << matched.size() << endl;
-	    for(vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
-	      cout << " hit  ID = " << (*m).trackId() << " Simhit x = " << (*m).localPosition().x() 
-		   << " y = " <<  (*m).localPosition().y() << " z = " <<  (*m).localPosition().x() << endl;
-	    }
+// 	    cout << " detector = " << myid << " clusize = " << clusiz << " Rechit x = " << position.x() 
+// 		 << " y = "<< position.y() << " z = " << position.z() << endl;
+// 	    cout << " matched = " << matched.size() << endl;
+// 	    for(vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
+// 	      cout << " hit  ID = " << (*m).trackId() << " Simhit x = " << (*m).localPosition().x() 
+// 		   << " y = " <<  (*m).localPosition().y() << " z = " <<  (*m).localPosition().x() << endl;
+// 	    }
 	    rechitsasmatch[j] = 1;
 	    rechitsasres[j] = rechitsasx[j] - matched[0].localPosition().x();
 	  }
 	  j++;
 	}
       }
+
+      //now matched hits
+
+      //loop over rechits-matched in the same subdetector
+      numrechitmatched=0;
+      SiStripRecHit2DMatchedLocalPosCollection::range rechitmatchedRange = rechitsmatched->get(detid);
+      SiStripRecHit2DMatchedLocalPosCollection::const_iterator rechitmatchedRangeIteratorBegin = rechitmatchedRange.first;
+      SiStripRecHit2DMatchedLocalPosCollection::const_iterator rechitmatchedRangeIteratorEnd   = rechitmatchedRange.second;
+      SiStripRecHit2DMatchedLocalPosCollection::const_iterator itermatched=rechitmatchedRangeIteratorBegin;
+      numrechitmatched = rechitmatchedRangeIteratorEnd - rechitmatchedRangeIteratorBegin;   
+      if(numrechitmatched > 0){
+	int j=0;
+	for(itermatched=rechitmatchedRangeIteratorBegin; itermatched!=rechitmatchedRangeIteratorEnd;++itermatched){
+	  SiStripRecHit2DMatchedLocalPos const rechit=*itermatched;
+	  LocalPoint position=rechit.localPosition();
+	  LocalError error=rechit.localPositionError();
+
+	  //try association here
+	  //--- add matching code here for testing 
+
+	  cout << "ValHit ---> try association matched! " << endl;
+	  matched.clear();
+	  const SiStripRecHit2DLocalPos *mono = rechit.monoHit();
+	  const SiStripRecHit2DLocalPos *st = rechit.stereoHit();
+	  LocalPoint monopos = mono->localPosition();
+	  LocalPoint stpos   = st->localPosition();
+
+	  rechitmatchedx[j] = position.x();
+	  rechitmatchedy[j] = position.y();
+	  rechitmatchedz[j] = position.z();
+	  //rechitmatchedphi[j] = position.phi();
+	  rechitmatchederrxx[j] = error.xx();
+	  rechitmatchederrxy[j] = error.xy();
+	  rechitmatchederryy[j] = error.yy();
+	  matched = associate.associateHit(*st);
+	  if(!matched.empty()){
+	    cout << " detector = " << myid << " #match = " << matched.size() << endl;
+	    cout << " Matched x = " << position.x() << " y = "<< position.y() << " z = " << position.z() << endl;
+	    cout << " Mono    x = " << monopos.x() << " y = "<< monopos.y() << " z = " << monopos.z() << endl;
+	    cout << " Stereo  x = " << stpos.x() << " y = "<< stpos.y() << " z = " << stpos.z() << endl;
+
+	    for(vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
+	      cout << " hit  ID = " << (*m).trackId() << " Simhit x = " << (*m).localPosition().x() 
+		   << " y = " <<  (*m).localPosition().y() << " z = " <<  (*m).localPosition().x() << endl;
+	    }
+	    rechitmatchedmatch[j] = 1;
+	    //project simhit;
+	    const GluedGeomDet* gluedDet = (const GluedGeomDet*)tracker.idToDet(rechit.geographicalId());
+	    const StripGeomDetUnit* partnerstripdet =(StripGeomDetUnit*) gluedDet->stereoDet();
+	    std::pair<LocalPoint,LocalVector> hitPair= projectHit(matched[0],partnerstripdet,gluedDet->surface());
+	    //	    rechitmatchedresx[j] = rechitmatchedx[j] - matched[0].localPosition().x();
+	    // rechitmatchedresy[j] = rechitmatchedy[j] - matched[0].localPosition().y();
+	    rechitmatchedresx[j] = rechitmatchedx[j] - hitPair.first.x();
+	    rechitmatchedresy[j] = rechitmatchedy[j] - hitPair.first.y();
+	    
+	    cout << " res x = " << rechitmatchedresx[j] << " rec(x) = " <<  rechitmatchedx[j] 
+	      //		 << " sim(x) = " << matched[0].localPosition().x() << endl;
+	      		 << " sim(x) = " << hitPair.first.x() << endl;
+	    cout << " res y = " << rechitmatchedresy[j] << " rec(y) = " <<  rechitmatchedy[j] 
+	      //		 << " sim(x) = " << matched[0].localPosition().y() << endl;
+	      		 << " sim(y) = " <<  hitPair.first.y()<< endl;
+	  }
+
+	  j++;
+	}
+      }
       
       //--- fill histograms
       
-      // 	for(int k=0; k<numsimhit; k++){
-      // 	  std::cout << " simhit (x,y,z) = "  <<  simhitx[k] << ", "  <<  simhity[k] << ", " <<  simhitz[k] << std::endl;
-      // 	}
-      // 	for(int k=0; k<numrechitrphi; k++){
-      // 	  std::cout << " rechitphi (x,y,z) = "  <<  rechitrphix[k] << ", " <<  rechitrphiy[k] << ", " << rechitrphiz[k] << std::endl;
-      // 	}
-      // 	for(int k=0; k<numrechitsas; k++){
-      // 	  std::cout << " rechitsas (x,y,z) = "  <<  rechitsasx[k] << ", " <<  rechitsasy[k] << ", " << rechitsasz[k] << std::endl;
-      // 	}
-      
-      
-      //std::cout << " det id= " << myid << " N(simhit) = " << numsimhit 
-      //<< " N(rechitrphi) = " << numrechitrphi << " N(rechitsas)= " << numrechitsas << std::endl;      
       
       if(numsimhit>0 || numrechitrphi>0 || numrechitsas>0 ){
-	if( detid.subdetId() == int(StripSubdetector::TIB)){
+// 	if(numrechitmatched>0){ 
+// 	  std::cout << " det id= " << myid << " N(simhit) = " << numsimhit 
+// 		    << " N(rechitrphi) = " << numrechitrphi << " N(rechitsas)= " << numrechitsas 
+// 		    << " N(matched) = " << numrechitmatched << std::endl;      
+// 	}
+	if ( detid.subdetId() == int(StripSubdetector::TIB)){
 	  TIBDetId tibid(myid); 
-	  tiblayer   = tibid.layer();
-	  // 	  tibfw_bw   = tibid.string()[0];
-	  // 	  tibext_int = tibid.string()[1];
-	  // 	  tibstring  = tibid.string()[2];
-	  // 	  tibmodule  = tibid.module();
-	  tibstereo  = tibid.stereo();
+	  Tiblayer   = tibid.layer();
+	  Tibfw_bw   = tibid.string()[0];
+	  Tibext_int = tibid.string()[1];
+	  Tibstring  = tibid.string()[2];
+	  Tibmodule  = tibid.module();
+	  Tibstereo  = tibid.stereo();
 	  
-	  Tiblayer = tiblayer;
-	  Tibstereo = tibstereo;
+	  //	  Tiblayer = tiblayer;
+	  //Tibstereo = tibstereo;
 	  Tibnumsimhit = numsimhit;
 	  Tibnumrechitrphi = numrechitrphi;
 	  Tibnumrechitsas = numrechitsas;
+	  Tibnumrechitmatched = numrechitmatched;
+	  
+	  for(int kk=0;kk<numrechitmatched; kk++){
+	    Tibmatchedx[kk] = rechitmatchedx[kk];
+	    Tibmatchedy[kk] = rechitmatchedy[kk];
+	    Tibmatchedz[kk] = rechitmatchedz[kk];
+	    Tibmatchederrxx[kk] = rechitmatchederrxx[kk];
+	    Tibmatchederrxy[kk] = rechitmatchederrxy[kk];
+	    Tibmatchederryy[kk] = rechitmatchederryy[kk];
+	    Tibmatchedresx[kk]= rechitmatchedresx[kk];
+	    Tibmatchedresy[kk]= rechitmatchedresy[kk];
+	    Tibmatchedmatch[kk]= rechitmatchedmatch[kk];
+	  }
 	  
 	  if(tibstereo == 0) {
 	    for(int k=0; k<numsimhit; k++){
@@ -495,6 +588,20 @@ namespace cms
 	  Tobnumsimhit = numsimhit;
 	  Tobnumrechitrphi = numrechitrphi;
 	  Tobnumrechitsas = numrechitsas;
+	  Tobnumrechitmatched = numrechitmatched;
+
+	  for(int kk=0;kk<numrechitmatched; kk++){
+	    Tobmatchedx[kk] = rechitmatchedx[kk];
+	    Tobmatchedy[kk] = rechitmatchedy[kk];
+	    Tobmatchedz[kk] = rechitmatchedz[kk];
+	    Tobmatchederrxx[kk] = rechitmatchederrxx[kk];
+	    Tobmatchederrxy[kk] = rechitmatchederrxy[kk];
+	    Tobmatchederryy[kk] = rechitmatchederryy[kk];
+	    Tobmatchedresx[kk]= rechitmatchedresx[kk];
+	    Tobmatchedresy[kk]= rechitmatchedresy[kk];
+	    Tobmatchedmatch[kk]= rechitmatchedmatch[kk];
+	  }
+	  
 	  if(tobstereo == 0) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tobsimhitx[k] = simhitx[k];
@@ -543,6 +650,18 @@ namespace cms
 	  Tidnumsimhit = numsimhit;
 	  Tidnumrechitrphi = numrechitrphi;
 	  Tidnumrechitsas = numrechitsas;
+	  Tidnumrechitmatched = numrechitmatched;
+	  for(int kk=0;kk<numrechitmatched; kk++){
+	    Tidmatchedx[kk] = rechitmatchedx[kk];
+	    Tidmatchedy[kk] = rechitmatchedy[kk];
+	    Tidmatchedz[kk] = rechitmatchedz[kk];
+	    Tidmatchederrxx[kk] = rechitmatchederrxx[kk];
+	    Tidmatchederrxy[kk] = rechitmatchederrxy[kk];
+	    Tidmatchederryy[kk] = rechitmatchederryy[kk];
+	    Tidmatchedresx[kk]= rechitmatchedresx[kk];
+	    Tidmatchedresy[kk]= rechitmatchedresy[kk];
+	    Tidmatchedmatch[kk]= rechitmatchedmatch[kk];
+	  }
 	  if(tidstereo == 0) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tidsimhitx[k] = simhitx[k];
@@ -560,6 +679,7 @@ namespace cms
 	      Tidrphisiz[kk] = clusizrphi[kk];
 	      Tidrphichg[kk] = cluchgrphi[kk];
 	    }
+
 	  } else if (tidstereo == 1) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tidsimhitx[k] = simhitx[k];
@@ -590,6 +710,18 @@ namespace cms
 	  Tecnumsimhit = numsimhit;
 	  Tecnumrechitrphi = numrechitrphi;
 	  Tecnumrechitsas = numrechitsas;
+	  Tecnumrechitmatched = numrechitmatched;
+	  for(int kk=0;kk<numrechitmatched; kk++){
+	    Tecmatchedx[kk] = rechitmatchedx[kk];
+	    Tecmatchedy[kk] = rechitmatchedy[kk];
+	    Tecmatchedz[kk] = rechitmatchedz[kk];
+	    Tecmatchederrxx[kk] = rechitmatchederrxx[kk];
+	    Tecmatchederrxy[kk] = rechitmatchederrxy[kk];
+	    Tecmatchederryy[kk] = rechitmatchederryy[kk];
+	    Tecmatchedresx[kk]= rechitmatchedresx[kk];
+	    Tecmatchedresy[kk]= rechitmatchedresy[kk];
+	    Tecmatchedmatch[kk]= rechitmatchedmatch[kk];
+	  }
 	  if(tecstereo == 0) {
 	    for(int k=0; k<numsimhit; k++){
 	      Tecsimhitx[k] = simhitx[k];
@@ -635,81 +767,8 @@ namespace cms
   
   ValHit::ValHit(edm::ParameterSet const& conf) : 
     conf_(conf),filename_(conf.getParameter<std::string>("fileName")) 
-    //histograms here
+
   {
-    //TIB
-    tibres1rphi = new TH1F("tibres1rphi", "res TIB lay 1 rphi", 100, -0.03, +0.03);   
-    tibres2rphi = new TH1F("tibres2rphi", "res TIB lay 2 rphi", 100, -0.03, +0.03); 
-    tibres3rphi = new TH1F("tibres3rphi", "res TIB lay 3 rphi", 100, -0.03, +0.03); 
-    tibres4rphi = new TH1F("tibres4rphi", "res TIB lay 4 rphi", 100, -0.03, +0.03); 
-    tibres1sas  = new TH1F("tibres1sas", "res TIB lay 1 sas", 100, -0.03, +0.03);
-    tibres2sas  = new TH1F("tibres2sas", "res TIB lay 2 sas", 100, -0.03, +0.03); 
-    tibclu1rphi = new TH1F("tibclu1rphi", "cluster size TIB lay 1 rphi", 5, -0.5, 4.5);   
-    tibclu2rphi = new TH1F("tibclu2rphi", "cluster size TIB lay 2 rphi", 5, -0.5, 4.5);   
-    tibclu3rphi = new TH1F("tibclu3rphi", "cluster size TIB lay 3 rphi", 5, -0.5, 4.5);   
-    tibclu4rphi = new TH1F("tibclu4rphi", "cluster size TIB lay 4 rphi", 5, -0.5, 4.5);   
-    tibclu1sas  = new TH1F("tibclu1sas", "cluster size TIB lay 1 sas", 5, -0.5, 4.5);   
-    tibclu2sas  = new TH1F("tibclu2sas", "cluster size TIB lay 2 sas", 5, -0.5, 4.5);   
-    tibhits     = new TH1F("tibhits", "# rechits TIB",6, -0.5, 6.5);
-
-    tib_rphi_digi_chg  = new TH1F("tib_rphi_digi_chg", "charge digi",300,0, 300);
-    tib_rphi_tot_nst  = new TH2F("tib_rphi_tot_nst", "charge vs nstp", 5, 0, 5, 300, 0, 300);
-    tib_rphi_pos_nst  = new TH2F("tib_rphi_pos_nst", "bary-1st vs nstp",5, 0, 5, 100,0, 4);
- 
-    //TOB
-    tobres1rphi = new TH1F("tobres1rphi", "res TOB lay 1 rphi", 100, -0.03, +0.03);   
-    tobres2rphi = new TH1F("tobres2rphi", "res TOB lay 2 rphi", 100, -0.03, +0.03); 
-    tobres3rphi = new TH1F("tobres3rphi", "res TOB lay 3 rphi", 100, -0.03, +0.03); 
-    tobres4rphi = new TH1F("tobres4rphi", "res TOB lay 4 rphi", 100, -0.03, +0.03); 
-    tobres5rphi = new TH1F("tobres5rphi", "res TOB lay 5 rphi", 100, -0.03, +0.03); 
-    tobres6rphi = new TH1F("tobres6rphi", "res TOB lay 6 rphi", 100, -0.03, +0.03); 
-    tobres1sas  = new TH1F("tobres1sas", "res TOB lay 1 sas", 100, -0.03, +0.03);
-    tobres2sas  = new TH1F("tobres2sas", "res TOB lay 2 sas", 100, -0.03, +0.03); 
-    tobclu1rphi = new TH1F("tobclu1rphi", "cluster size TOB lay 1 rphi", 5, -0.5, 4.5);   
-    tobclu2rphi = new TH1F("tobclu2rphi", "cluster size TOB lay 2 rphi", 5, -0.5, 4.5);   
-    tobclu3rphi = new TH1F("tobclu3rphi", "cluster size TOB lay 3 rphi", 5, -0.5, 4.5);   
-    tobclu4rphi = new TH1F("tobclu4rphi", "cluster size TOB lay 4 rphi", 5, -0.5, 4.5);   
-    tobclu5rphi = new TH1F("tobclu5rphi", "cluster size TOB lay 5 rphi", 5, -0.5, 4.5);   
-    tobclu6rphi = new TH1F("tobclu6rphi", "cluster size TOB lay 6 rphi", 5, -0.5, 4.5);   
-    tobclu1sas  = new TH1F("tobclu1sas", "cluster size TOB lay 1 sas", 5, -0.5, 4.5);   
-    tobclu2sas  = new TH1F("tobclu2sas", "cluster size TOB lay 2 sas", 5, -0.5, 4.5);   
-
-    //TID
-    tidres1rphi = new TH1F("tidres1rphi", "res TID lay 1 rphi", 100, -1.0, +1.0);   
-    tidres2rphi = new TH1F("tidres2rphi", "res TID lay 2 rphi", 100, -1.0, +1.0);   
-    tidres3rphi = new TH1F("tidres3rphi", "res TID lay 3 rphi", 100, -1.0, +1.0);   
-    tidres1sas = new TH1F("tidres1sas", "res TID lay 1 sas", 100, -1.0, +1.0);   
-    tidres2sas = new TH1F("tidres2sas", "res TID lay 2 sas", 100, -1.0, +1.0);   
-    tidclu1rphi = new TH1F("tidclu1rphi", "cluster size TID lay 1 rphi", 5, -0.5, 4.5);   
-    tidclu2rphi = new TH1F("tidclu2rphi", "cluster size TID lay 1 rphi", 5, -0.5, 4.5);   
-    tidclu3rphi = new TH1F("tidclu3rphi", "cluster size TID lay 1 rphi", 5, -0.5, 4.5);   
-    tidclu1sas = new TH1F("tidclu1sas", "cluster size TID lay 1 sas", 5, -0.5, 4.5);   
-    tidclu2sas = new TH1F("tidclu2sas", "cluster size TID lay 1 sas", 5, -0.5, 4.5);   
-
-    //TEC
-    tecres1rphi = new TH1F("tecres1rphi", "res TEC lay 1 rphi", 100, -1.0, +1.0);   
-    tecres2rphi = new TH1F("tecres2rphi", "res TEC lay 2 rphi", 100, -1.0, +1.0);   
-    tecres3rphi = new TH1F("tecres3rphi", "res TEC lay 3 rphi", 100, -1.0, +1.0);   
-    tecres4rphi = new TH1F("tecres4rphi", "res TEC lay 4 rphi", 100, -1.0, +1.0);   
-    tecres5rphi = new TH1F("tecres5rphi", "res TEC lay 5 rphi", 100, -1.0, +1.0);   
-    tecres6rphi = new TH1F("tecres6rphi", "res TEC lay 6 rphi", 100, -1.0, +1.0);   
-    tecres7rphi = new TH1F("tecres7rphi", "res TEC lay 7 rphi", 100, -1.0, +1.0);   
-    tecres1sas = new TH1F("tecres1sas", "res TEC lay 1 sas", 100, -1.0, +1.0);   
-    tecres2sas = new TH1F("tecres2sas", "res TEC lay 2 sas", 100, -1.0, +1.0);   
-    tecres5sas = new TH1F("tecres5sas", "res TEC lay 5 sas", 100, -1.0, +1.0);   
-    tecclu1rphi = new TH1F("tecclu1rphi", "cluster size TEC lay 1 rphi", 5, -0.5, 4.5);   
-    tecclu2rphi = new TH1F("tecclu2rphi", "cluster size TEC lay 2 rphi", 5, -0.5, 4.5);   
-    tecclu3rphi = new TH1F("tecclu3rphi", "cluster size TEC lay 3 rphi", 5, -0.5, 4.5);   
-    tecclu4rphi = new TH1F("tecclu4rphi", "cluster size TEC lay 4 rphi", 5, -0.5, 4.5);   
-    tecclu5rphi = new TH1F("tecclu5rphi", "cluster size TEC lay 5 rphi", 5, -0.5, 4.5);   
-    tecclu6rphi = new TH1F("tecclu6rphi", "cluster size TEC lay 6 rphi", 5, -0.5, 4.5);   
-    tecclu7rphi = new TH1F("tecclu7rphi", "cluster size TEC lay 7 rphi", 5, -0.5, 4.5);   
-    tecclu1sas = new TH1F("tecclu1sas", "cluster size TEC lay 1 sas", 5, -0.5, 4.5);   
-    tecclu2sas = new TH1F("tecclu2sas", "cluster size TEC lay 2 sas", 5, -0.5, 4.5);   
-    tecclu5sas = new TH1F("tecclu5sas", "cluster size TEC lay 5 sas", 5, -0.5, 4.5);   
-
-
-    //======================================================
     myFile = new TFile(filename_.c_str(),"RECREATE");
     myTree = new TTree("HitTree","Tracker Validation tree");
     // GENERAL block
@@ -719,7 +778,10 @@ namespace cms
     //TIB info
     myTree->Branch("Tiblayer", &Tiblayer, "Tiblayer/I");
     myTree->Branch("Tibstereo", &Tibstereo, "Tibstereo/I");
- 
+    myTree->Branch("Tibfw_bw", &Tibfw_bw, "Tibfw_bw/I");
+    myTree->Branch("Tibext_int", &Tibext_int, "Tibext_int/I");
+    myTree->Branch("Tibstring", &Tibstring, "Tibstring/I");
+    myTree->Branch("Tibmodule", &Tibmodule, "Tibmodule/I");
     Tibnumsimhit=0;
     myTree->Branch("Tibnumsimhit", &Tibnumsimhit, "Tibnumsimhit/I");
     myTree->Branch("Tibsimx", &Tibsimhitx, "Tibsimx[Tibnumsimhit]/F");
@@ -733,19 +795,29 @@ namespace cms
     myTree->Branch("Tibrphiy", &Tibrphiy, "Tibrphiy[Tibnumrechitrphi]/F");
     myTree->Branch("Tibrphiz", &Tibrphiz, "Tibrphiz[Tibnumrechitrphi]/F");
     myTree->Branch("Tibrphires", &Tibrphires, "Tibrphires[Tibnumrechitrphi]/F");
-    myTree->Branch("Tibrphimatch", &Tibrphimatch, "Tibrphimatch[Tibnumrechitrphi]/F");
+    myTree->Branch("Tibrphimatch", &Tibrphimatch, "Tibrphimatch[Tibnumrechitrphi]/I");
     myTree->Branch("Tibrphisiz", &Tibrphisiz, "Tibrphisiz[Tibnumrechitrphi]/I");
     myTree->Branch("Tibrphichg", &Tibrphichg, "Tibrphichg[Tibnumrechitrphi]/F");
- 
     Tibnumrechitsas=0;
     myTree->Branch("Tibnumrechitsas", &Tibnumrechitsas, "Tibnumrechitsas/I");
     myTree->Branch("Tibsasx", &Tibsasx, "Tibsasx[Tibnumrechitsas]/F"); 
     myTree->Branch("Tibsasy", &Tibsasy, "Tibsasy[Tibnumrechitsas]/F");
     myTree->Branch("Tibsasz", &Tibsasz, "Tibsasz[Tibnumrechitsas]/F");        
     myTree->Branch("Tibsasres", &Tibsasres, "Tibsasres[Tibnumrechitsas]/F");
-    myTree->Branch("Tibsasmatch", &Tibsasmatch, "Tibsasmatch[Tibnumrechitsas]/F");
+    myTree->Branch("Tibsasmatch", &Tibsasmatch, "Tibsasmatch[Tibnumrechitsas]/I");
     myTree->Branch("Tibsassiz", &Tibsassiz, "Tibsassiz[Tibnumrechitsas]/I");
     myTree->Branch("Tibsaschg", &Tibsaschg, "Tibsaschg[Tibnumrechitsas]/F");
+    Tibnumrechitmatched=0;
+    myTree->Branch("Tibnumrechitmatched", &Tibnumrechitmatched, "Tibnumrechitmatched/I");
+    myTree->Branch("Tibmatchedx", &Tibmatchedx, "Tibmatchedx[Tibnumrechitmatched]/F"); 
+    myTree->Branch("Tibmatchedy", &Tibmatchedy, "Tibmatchedy[Tibnumrechitmatched]/F");
+    myTree->Branch("Tibmatchedz", &Tibmatchedz, "Tibmatchedz[Tibnumrechitmatched]/F");        
+    myTree->Branch("Tibmatchederrxx", &Tibmatchederrxx, "Tibmatchederrxx[Tibnumrechitmatched]/F"); 
+    myTree->Branch("Tibmatchederrxy", &Tibmatchederrxy, "Tibmatchederrxy[Tibnumrechitmatched]/F");
+    myTree->Branch("Tibmatchederryy", &Tibmatchederryy, "Tibmatchederryy[Tibnumrechitmatched]/F");        
+    myTree->Branch("Tibmatchedresx", &Tibmatchedresx, "Tibmatchedresx[Tibnumrechitmatched]/F");
+    myTree->Branch("Tibmatchedresy", &Tibmatchedresy, "Tibmatchedresy[Tibnumrechitmatched]/F");
+    myTree->Branch("Tibmatchedmatch", &Tibmatchedmatch, "Tibmatchedmatch[Tibnumrechitmatched]/I");
  
     //TOB info
     myTree->Branch("Toblayer", &Toblayer, "Toblayer/I");
@@ -775,6 +847,18 @@ namespace cms
     myTree->Branch("Tobsasmatch", &Tobsasmatch, "Tobsasmatch[Tobnumrechitsas]/I");
     myTree->Branch("Tobsassiz", &Tobsassiz, "Tobsassiz[Tobnumrechitsas]/I");
     myTree->Branch("Tobsaschg", &Tobsaschg, "Tobsaschg[Tobnumrechitsas]/F");
+    Tobnumrechitmatched=0;
+    myTree->Branch("Tobnumrechitmatched", &Tobnumrechitmatched, "Tobnumrechitmatched/I");
+    myTree->Branch("Tobmatchedx", &Tobmatchedx, "Tobmatchedx[Tobnumrechitmatched]/F"); 
+    myTree->Branch("Tobmatchedy", &Tobmatchedy, "Tobmatchedy[Tobnumrechitmatched]/F");
+    myTree->Branch("Tobmatchedz", &Tobmatchedz, "Tobmatchedz[Tobnumrechitmatched]/F");        
+    myTree->Branch("Tobmatchederrxx", &Tobmatchederrxx, "Tobmatchederrxx[Tobnumrechitmatched]/F"); 
+    myTree->Branch("Tobmatchederrxy", &Tobmatchederrxy, "Tobmatchederrxy[Tobnumrechitmatched]/F");
+    myTree->Branch("Tobmatchederryy", &Tobmatchederryy, "Tobmatchederryy[Tobnumrechitmatched]/F");        
+    myTree->Branch("Tobmatchedresx", &Tobmatchedresx, "Tobmatchedresx[Tobnumrechitmatched]/F");
+    myTree->Branch("Tobmatchedresy", &Tobmatchedresy, "Tobmatchedresy[Tobnumrechitmatched]/F");
+    myTree->Branch("Tobmatchedmatch", &Tobmatchedmatch, "Tobmatchedmatch[Tobnumrechitmatched]/I");
+ 
  
     //TID info
     myTree->Branch("Tidlayer", &Tidlayer, "Tidlayer/I");
@@ -805,7 +889,19 @@ namespace cms
     myTree->Branch("Tidsasmatch", &Tidsasmatch, "Tidsasmatch[Tidnumrechitsas]/I");
     myTree->Branch("Tidsassiz", &Tidsassiz, "Tidsassiz[Tidnumrechitsas]/I");
     myTree->Branch("Tidsaschg", &Tidsaschg, "Tidsaschg[Tidnumrechitsas]/F");
+     Tidnumrechitmatched=0;
+    myTree->Branch("Tidnumrechitmatched", &Tidnumrechitmatched, "Tidnumrechitmatched/I");
+    myTree->Branch("Tidmatchedx", &Tidmatchedx, "Tidmatchedx[Tidnumrechitmatched]/F"); 
+    myTree->Branch("Tidmatchedy", &Tidmatchedy, "Tidmatchedy[Tidnumrechitmatched]/F");
+    myTree->Branch("Tidmatchedz", &Tidmatchedz, "Tidmatchedz[Tidnumrechitmatched]/F");        
+    myTree->Branch("Tidmatchederrxx", &Tidmatchederrxx, "Tidmatchederrxx[Tidnumrechitmatched]/F"); 
+    myTree->Branch("Tidmatchederrxy", &Tidmatchederrxy, "Tidmatchederrxy[Tidnumrechitmatched]/F");
+    myTree->Branch("Tidmatchederryy", &Tidmatchederryy, "Tidmatchederryy[Tidnumrechitmatched]/F");        
+    myTree->Branch("Tidmatchedresx", &Tidmatchedresx, "Tidmatchedresx[Tidnumrechitmatched]/F");
+    myTree->Branch("Tidmatchedresy", &Tidmatchedresy, "Tidmatchedresy[Tidnumrechitmatched]/F");
+    myTree->Branch("Tidmatchedmatch", &Tidmatchedmatch, "Tidmatchedmatch[Tidnumrechitmatched]/I");
  
+
     //TEC info
     myTree->Branch("Teclayer", &Teclayer, "Teclayer/I");
     myTree->Branch("Tecstereo", &Tecstereo, "Tecstereo/I");
@@ -835,6 +931,18 @@ namespace cms
     myTree->Branch("Tecsasmatch", &Tecsasmatch, "Tecsasmatch[Tecnumrechitsas]/I");
     myTree->Branch("Tecsassiz", &Tecsassiz, "Tecsassiz[Tecnumrechitsas]/I");
     myTree->Branch("Tecsaschg", &Tecsaschg, "Tecsaschg[Tecnumrechitsas]/F");
+    Tecnumrechitmatched=0;
+    myTree->Branch("Tecnumrechitmatched", &Tecnumrechitmatched, "Tecnumrechitmatched/I");
+    myTree->Branch("Tecmatchedx", &Tecmatchedx, "Tecmatchedx[Tecnumrechitmatched]/F"); 
+    myTree->Branch("Tecmatchedy", &Tecmatchedy, "Tecmatchedy[Tecnumrechitmatched]/F");
+    myTree->Branch("Tecmatchedz", &Tecmatchedz, "Tecmatchedz[Tecnumrechitmatched]/F");        
+    myTree->Branch("Tecmatchederrxx", &Tecmatchederrxx, "Tecmatchederrxx[Tecnumrechitmatched]/F"); 
+    myTree->Branch("Tecmatchederrxy", &Tecmatchederrxy, "Tecmatchederrxy[Tecnumrechitmatched]/F");
+    myTree->Branch("Tecmatchederryy", &Tecmatchederryy, "Tecmatchederryy[Tecnumrechitmatched]/F");        
+    myTree->Branch("Tecmatchedresx", &Tecmatchedresx, "Tecmatchedresx[Tecnumrechitmatched]/F");
+    myTree->Branch("Tecmatchedresy", &Tecmatchedresy, "Tecmatchedresy[Tecnumrechitmatched]/F");
+    myTree->Branch("Tecmatchedmatch", &Tecmatchedmatch, "Tecmatchedmatch[Tecnumrechitmatched]/I");
+ 
  
   }
   
@@ -844,78 +952,41 @@ namespace cms
     delete myFile;
   }
   
+  std::pair<LocalPoint,LocalVector> ValHit::projectHit( const PSimHit& hit, const StripGeomDetUnit* stripDet,
+                                                               const BoundPlane& plane) 
+{
+  //  const StripGeomDetUnit* stripDet = dynamic_cast<const StripGeomDetUnit*>(hit.det());
+  //if (stripDet == 0) throw MeasurementDetException("HitMatcher hit is not on StripGeomDetUnit");
+
+  const StripTopology& topol = stripDet->specificTopology();
+  GlobalPoint globalpos= stripDet->surface().toGlobal(hit.localPosition());
+  LocalPoint localHit = plane.toLocal(globalpos);
+  //track direction
+  LocalVector locdir=hit.localDirection();
+  //rotate track in new frame
+
+  GlobalVector globaldir= stripDet->surface().toGlobal(locdir);
+  LocalVector dir=plane.toLocal(globaldir);
+  float scale = -localHit.z() / dir.z();
+
+  LocalPoint projectedPos = localHit + scale*dir;
+
+  //  std::cout << "projectedPos " << projectedPos << std::endl;
+
+  float selfAngle = topol.stripAngle( topol.strip( hit.localPosition()));
+
+  LocalVector stripDir( sin(selfAngle), cos(selfAngle), 0); // vector along strip in hit frame
+
+  LocalVector localStripDir( plane.toLocal(stripDet->surface().toGlobal( stripDir)));
+
+  return std::pair<LocalPoint,LocalVector>( projectedPos, localStripDir);
+}
 
 
   void ValHit::endJob() {  
     cout << ">>> ending histograms" << endl;
     myFile->cd();
     myTree->Write();
-    tibres1rphi->Write(); 
-    tibres2rphi->Write(); 
-    tibres3rphi->Write(); 
-    tibres4rphi->Write();
-    tibres1sas->Write();  
-    tibres2sas->Write();
-    tibclu1rphi->Write(); 
-    tibclu2rphi->Write(); 
-    tibclu3rphi->Write(); 
-    tibclu4rphi->Write();
-    tibclu1sas->Write();
-    tibclu2sas->Write();
-    tib_rphi_digi_chg->Write();
-    tib_rphi_tot_nst->Write();
-    tib_rphi_pos_nst->Write();
-    //TOB
-    tobres1rphi->Write(); 
-    tobres2rphi->Write(); 
-    tobres3rphi->Write(); 
-    tobres4rphi->Write();
-    tobres5rphi->Write();
-    tobres6rphi->Write();
-    tobres1sas->Write();  
-    tobres2sas->Write();
-    tobclu1rphi->Write(); 
-    tobclu2rphi->Write(); 
-    tobclu3rphi->Write(); 
-    tobclu4rphi->Write();
-    tobclu5rphi->Write();
-    tobclu6rphi->Write();
-    tobclu1sas->Write();
-    tobclu2sas->Write();
-    //TID
-    tidres1rphi->Write(); 
-    tidres2rphi->Write(); 
-    tidres3rphi->Write(); 
-    tidres1sas->Write();  
-    tidres2sas->Write();
-    tidclu1rphi->Write(); 
-    tidclu2rphi->Write(); 
-    tidclu3rphi->Write(); 
-    tidclu1sas->Write();
-    tidclu2sas->Write();
-    //TEC
-    tecres1rphi->Write(); 
-    tecres2rphi->Write(); 
-    tecres3rphi->Write(); 
-    tecres4rphi->Write();
-    tecres5rphi->Write();
-    tecres6rphi->Write();
-    tecres7rphi->Write();
-    tecres1sas->Write();  
-    tecres2sas->Write();
-    tecres5sas->Write();
-    tecclu1rphi->Write(); 
-    tecclu2rphi->Write(); 
-    tecclu3rphi->Write(); 
-    tecclu4rphi->Write();
-    tecclu5rphi->Write();
-    tecclu6rphi->Write();
-    tecclu7rphi->Write();
-    tecclu1sas->Write();
-    tecclu2sas->Write();
-    tecclu5sas->Write();
-    //------------------------
-    tibhits->Write();
     myFile->Close();
     cout << ">>> File closed " << endl;
   }
