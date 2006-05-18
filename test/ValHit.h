@@ -19,21 +19,24 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
- 
 #include "DataFormats/Common/interface/EDProduct.h"
- 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
  
-//#include "RecoLocalTracker/SiStripRecHitConverter/test/ReadRecHitAlgorithm.h"
 //--- for SimHit
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetUnit.h"
-#include "Geometry/CommonTopologies/interface/StripTopology.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 
-#include "RecoLocalTracker/SiStripRecHitConverter/test/SiStripHitAssociator.h"                                                                                                                          
+//--- for RecHit
+#include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/SiStripCluster/interface/SiStripClusterCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DLocalPosCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DMatchedLocalPosCollection.h"
+#include "DataFormats/Common/interface/OwnVector.h"
+
+//--- for StripDigiSimLink
+#include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLink.h"
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
+
 //needed for the geometry:
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
@@ -41,7 +44,10 @@
 #include "DataFormats/SiStripDetId/interface/TIBDetId.h"
 #include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 #include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-
+#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+#include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetUnit.h"
+#include "Geometry/CommonTopologies/interface/StripTopology.h"
+#include "Geometry/CommonDetUnit/interface/GeomDetType.h"
  
 #include "TROOT.h"
 #include "TFile.h"
@@ -61,7 +67,8 @@ class ValHit : public edm::EDAnalyzer
   virtual ~ValHit();
 
   void endJob();
-  
+  std::pair<LocalPoint,LocalVector> projectHit( const PSimHit& hit, const StripGeomDetUnit* stripDet,
+							const BoundPlane& plane);
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
   
   std::vector<PSimHit> matched;
@@ -80,7 +87,7 @@ class ValHit : public edm::EDAnalyzer
   std::string filename_;
   static const int MAXHIT = 100;
 
-  int tiblayer, tibstereo;
+  int tiblayer, tibstereo, tibfw_bw, tibext_int, tibstring, tibmodule;
   float simhitx[MAXHIT];
   float simhity[MAXHIT];
   float simhitz[MAXHIT];
@@ -92,17 +99,26 @@ class ValHit : public edm::EDAnalyzer
   float rechitrphiphi[MAXHIT];
   float rechitrphires[MAXHIT];
   int rechitrphimatch[MAXHIT];
+  int clusizrphi[MAXHIT];
+  float cluchgrphi[MAXHIT];
   float rechitsasx[MAXHIT];
   float rechitsasy[MAXHIT];
   float rechitsasz[MAXHIT];
   float rechitsasphi[MAXHIT];
   float rechitsasres[MAXHIT];
   int rechitsasmatch[MAXHIT];
-  int clusizrphi[MAXHIT];
   int clusizsas[MAXHIT];
-  float cluchgrphi[MAXHIT];
   float cluchgsas[MAXHIT];
-
+  float rechitmatchedx[MAXHIT];
+  float rechitmatchedy[MAXHIT];
+  float rechitmatchedz[MAXHIT];
+  float rechitmatchederrxx[MAXHIT];
+  float rechitmatchederrxy[MAXHIT];
+  float rechitmatchederryy[MAXHIT];
+  float rechitmatchedphi[MAXHIT];
+  float rechitmatchedresx[MAXHIT];
+  float rechitmatchedresy[MAXHIT];
+  int rechitmatchedmatch[MAXHIT];
 
   //tree variable declaration
   TFile* myFile;
@@ -111,10 +127,14 @@ class ValHit : public edm::EDAnalyzer
   unsigned int myEvent;
   int Tiblayer;
   int Tibstereo; 
+  int Tibfw_bw; 
+  int Tibext_int; 
+  int Tibstring; 
+  int Tibmodule; 
   int Tibnumsimhit;
   int Tibnumrechitrphi;
   int Tibnumrechitsas;
-
+  int Tibnumrechitmatched;
   float Tibsimhitx[MAXHIT];
   float Tibsimhity[MAXHIT];
   float Tibsimhitz[MAXHIT];
@@ -136,12 +156,24 @@ class ValHit : public edm::EDAnalyzer
   int Tibsasmatch[MAXHIT];
   int Tibsassiz[MAXHIT];
   float Tibsaschg[MAXHIT];
+  float Tibmatchedx[MAXHIT];
+  float Tibmatchedy[MAXHIT];
+  float Tibmatchedz[MAXHIT];
+  float Tibmatchederrxx[MAXHIT];
+  float Tibmatchederrxy[MAXHIT];
+  float Tibmatchederryy[MAXHIT];
+  float Tibmatchedresx[MAXHIT];
+  float Tibmatchedresy[MAXHIT];
+  int Tibmatchedmatch[MAXHIT];
 
+  unsigned int toblayer;
+  unsigned int tobstereo;
   int Toblayer;
   int Tobstereo; 
   int Tobnumsimhit;
   int Tobnumrechitrphi;
   int Tobnumrechitsas;
+  int Tobnumrechitmatched;
   float Tobsimhitx[MAXHIT];
   float Tobsimhity[MAXHIT];
   float Tobsimhitz[MAXHIT];
@@ -163,14 +195,26 @@ class ValHit : public edm::EDAnalyzer
   int Tobsasmatch[MAXHIT];
   int Tobsassiz[MAXHIT];
   float Tobsaschg[MAXHIT];
+  float Tobmatchedx[MAXHIT];
+  float Tobmatchedy[MAXHIT];
+  float Tobmatchedz[MAXHIT];
+  float Tobmatchederrxx[MAXHIT];
+  float Tobmatchederrxy[MAXHIT];
+  float Tobmatchederryy[MAXHIT];
+  float Tobmatchedresx[MAXHIT];
+  float Tobmatchedresy[MAXHIT];
+  int Tobmatchedmatch[MAXHIT];
 
 
+  unsigned int tidlayer;
+  unsigned int tidstereo;
   int Tidlayer;
   int Tidstereo; 
   int Tidring; 
   int Tidnumsimhit;
   int Tidnumrechitrphi;
   int Tidnumrechitsas;
+  int Tidnumrechitmatched;
   float Tidsimhitx[MAXHIT];
   float Tidsimhity[MAXHIT];
   float Tidsimhitz[MAXHIT];
@@ -192,14 +236,26 @@ class ValHit : public edm::EDAnalyzer
   int Tidsasmatch[MAXHIT];
   int Tidsassiz[MAXHIT];
   float Tidsaschg[MAXHIT];
+  float Tidmatchedx[MAXHIT];
+  float Tidmatchedy[MAXHIT];
+  float Tidmatchedz[MAXHIT];
+  float Tidmatchederrxx[MAXHIT];
+  float Tidmatchederrxy[MAXHIT];
+  float Tidmatchederryy[MAXHIT];
+  float Tidmatchedresx[MAXHIT];
+  float Tidmatchedresy[MAXHIT];
+  int Tidmatchedmatch[MAXHIT];
 
 
+  unsigned int teclayer;
+  unsigned int tecstereo;
   int Teclayer;
   int Tecstereo; 
   int Tecring;
   int Tecnumsimhit;
   int Tecnumrechitrphi;
   int Tecnumrechitsas;
+  int Tecnumrechitmatched;
   float Tecsimhitx[MAXHIT];
   float Tecsimhity[MAXHIT];
   float Tecsimhitz[MAXHIT];
@@ -221,30 +277,16 @@ class ValHit : public edm::EDAnalyzer
   int Tecsassiz[MAXHIT];
   int Tecsasmatch[MAXHIT];
   float Tecsaschg[MAXHIT];
+  float Tecmatchedx[MAXHIT];
+  float Tecmatchedy[MAXHIT];
+  float Tecmatchedz[MAXHIT];
+  float Tecmatchederrxx[MAXHIT];
+  float Tecmatchederrxy[MAXHIT];
+  float Tecmatchederryy[MAXHIT];
+  float Tecmatchedresx[MAXHIT];
+  float Tecmatchedresy[MAXHIT];
+  int Tecmatchedmatch[MAXHIT];
     
-  TH1F * tibres1rphi, * tibres2rphi, * tibres3rphi, * tibres4rphi, * tibres1sas, * tibres2sas;
-  TH1F * tibclu1rphi, * tibclu2rphi, * tibclu3rphi, * tibclu4rphi, * tibclu1sas, * tibclu2sas;
-  TH1F * tibhits;    
-  TH1F * tib_rphi_digi_chg;
-  TH2F * tib_rphi_tot_nst;
-  TH2F * tib_rphi_pos_nst;
-
-
-  unsigned int toblayer;
-  unsigned int tobstereo;
-  TH1F * tobres1rphi, * tobres2rphi, * tobres3rphi, * tobres4rphi, * tobres5rphi, * tobres6rphi, * tobres1sas, * tobres2sas;
-  TH1F * tobclu1rphi, * tobclu2rphi, * tobclu3rphi, * tobclu4rphi, * tobclu5rphi, * tobclu6rphi, * tobclu1sas, * tobclu2sas;
-
-  unsigned int tidlayer;
-  unsigned int tidstereo;
-  TH1F * tidres1rphi, * tidres2rphi, * tidres3rphi, * tidres1sas, * tidres2sas;
-  TH1F * tidclu1rphi, * tidclu2rphi, * tidclu3rphi, * tidclu1sas, * tidclu2sas;
-
-  unsigned int teclayer;
-  unsigned int tecstereo;
-  TH1F * tecres1rphi, * tecres2rphi, * tecres3rphi, * tecres4rphi,* tecres5rphi,* tecres6rphi,* tecres7rphi, * tecres1sas, * tecres2sas, * tecres5sas;
-  TH1F * tecclu1rphi, * tecclu2rphi, * tecclu3rphi, * tecclu4rphi,* tecclu5rphi,* tecclu6rphi,* tecclu7rphi, * tecclu1sas, * tecclu2sas, * tecclu5sas;
-
 };
 
 }
