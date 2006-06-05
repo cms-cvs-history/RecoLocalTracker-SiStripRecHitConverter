@@ -352,16 +352,16 @@ namespace cms
 	  SiStripRecHit2DLocalPos const rechit=*iterrphi;
 	  LocalPoint position=rechit.localPosition();
 	  //LocalError error=rechit.localPositionError();
-	  const std::vector<const SiStripCluster*> clust=rechit.cluster();
+	  const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=rechit.cluster();
 	  int clusiz=0;
 	  int totcharge=0;
-	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
-	    clusiz = (*ic)->amplitudes().size();
-	    const std::vector<short> amplitudes=(*ic)->amplitudes();
+	  //	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
+	    clusiz = clust->amplitudes().size();
+	    const std::vector<short> amplitudes=clust->amplitudes();
 	    for(size_t i=0; i<amplitudes.size();i++){
 	      totcharge+=amplitudes[i];
 	    }
-	  }
+	      // }
 	  rechitrphix[i] = position.x();
 	  rechitrphiy[i] = position.y();
 	  rechitrphiz[i] = position.z();
@@ -402,16 +402,16 @@ namespace cms
 	  SiStripRecHit2DLocalPos const rechit=*itersas;
 	  LocalPoint position=rechit.localPosition();
 	  //	LocalError error=rechit.localPositionError();
-	  std::vector<const SiStripCluster*> clust=rechit.cluster();
+	  const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=rechit.cluster();
 	  int clusiz=0;
 	  int totcharge=0;
-	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
-	    clusiz = (*ic)->amplitudes().size();
-	    const std::vector<short> amplitudes=(*ic)->amplitudes();
+	  //	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
+	    clusiz = clust->amplitudes().size();
+	    const std::vector<short> amplitudes=clust->amplitudes();
 	    for(size_t i=0; i<amplitudes.size();i++){
 	      totcharge+=amplitudes[i];
 	    }
-	  }
+	    //	  }
 	  rechitsasx[j] = position.x();
 	  rechitsasy[j] = position.y();
 	  rechitsasz[j] = position.z();
