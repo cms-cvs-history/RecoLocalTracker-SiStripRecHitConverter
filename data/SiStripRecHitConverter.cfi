@@ -2,6 +2,6 @@ module LocalMeasurementConverter = SiStripRecHitConverter{
        untracked int32 VerbosityLevel = 1
        string ClusterProducer = "ThreeThresholdClusterizer"
        string StripCPE = "StripCPEfromTrackAngle"
-       double NSigmaInside = 3.
+       string Matcher = "StandardMatcher"
  }
 
