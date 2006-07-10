@@ -1,0 +1,6 @@
+       es_module = StripCPEfromTrackAngleESProducer {
+                string ComponentName = "SimpleStripCPE"
+                double TanLorentzAnglePerTesla = 0.032
+                bool UseMagneticField = true
+        }
+
