@@ -1,4 +1,4 @@
-module LocalMeasurementConverter = SiStripRecHitConverter{
+module SiStripRecHits2D = SiStripRecHitConverter{
        untracked int32 VerbosityLevel = 1
        string ClusterProducer = "ThreeThresholdClusterizer"
        string StripCPE = "StripCPEfromTrackAngle"
