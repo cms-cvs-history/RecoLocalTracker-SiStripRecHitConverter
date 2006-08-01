@@ -1,10 +1,11 @@
-module SiStripRecHits2D = SiStripRecHitConverter {
-  untracked int32 VerbosityLevel = 1
-  string ClusterProducer = "SiStripClusters"
-  string StripCPE = "StripCPEfromTrackAngle"
-  string Matcher = "StandardMatcher"
-  string matchedRecHits = "matchedRecHit"
-  string rphiRecHits = "rphiRecHit"
-  string stereoRecHits = "stereoRecHit"
-}
+module siStripMatchedRecHits = SiStripRecHitConverter{
+       untracked int32 VerbosityLevel = 1
+       string ClusterProducer = "siStripClusters"
+       string StripCPE = "StripCPEfromTrackAngle"
+       string Matcher = "StandardMatcher"
+       string matchedRecHits = "matchedRecHit"
+       string rphiRecHits = "rphiRecHit"
+       string stereoRecHits = "stereoRecHit"
+ }
+
 
