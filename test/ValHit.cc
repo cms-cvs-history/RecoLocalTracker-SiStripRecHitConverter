@@ -82,14 +82,14 @@ namespace cms
     edm::Handle<edm::PSimHitContainer> TECHitsLowTof;
     edm::Handle<edm::PSimHitContainer> TECHitsHighTof;
 
-    e.getByLabel("SimG4Object","TrackerHitsTIBLowTof", TIBHitsLowTof);
-    e.getByLabel("SimG4Object","TrackerHitsTIBHighTof", TIBHitsHighTof);
-    e.getByLabel("SimG4Object","TrackerHitsTIDLowTof", TIDHitsLowTof);
-    e.getByLabel("SimG4Object","TrackerHitsTIDHighTof", TIDHitsHighTof);
-    e.getByLabel("SimG4Object","TrackerHitsTOBLowTof", TOBHitsLowTof);
-    e.getByLabel("SimG4Object","TrackerHitsTOBHighTof", TOBHitsHighTof);
-    e.getByLabel("SimG4Object","TrackerHitsTECLowTof", TECHitsLowTof);
-    e.getByLabel("SimG4Object","TrackerHitsTECHighTof", TECHitsHighTof);
+    e.getByLabel("g4SimHits","TrackerHitsTIBLowTof", TIBHitsLowTof);
+    e.getByLabel("g4SimHits","TrackerHitsTIBHighTof", TIBHitsHighTof);
+    e.getByLabel("g4SimHits","TrackerHitsTIDLowTof", TIDHitsLowTof);
+    e.getByLabel("g4SimHits","TrackerHitsTIDHighTof", TIDHitsHighTof);
+    e.getByLabel("g4SimHits","TrackerHitsTOBLowTof", TOBHitsLowTof);
+    e.getByLabel("g4SimHits","TrackerHitsTOBHighTof", TOBHitsHighTof);
+    e.getByLabel("g4SimHits","TrackerHitsTECLowTof", TECHitsLowTof);
+    e.getByLabel("g4SimHits","TrackerHitsTECHighTof", TECHitsHighTof);
     
     theStripHits.insert(theStripHits.end(), TIBHitsLowTof->begin(), TIBHitsLowTof->end()); 
     theStripHits.insert(theStripHits.end(), TIBHitsHighTof->begin(), TIBHitsHighTof->end());
