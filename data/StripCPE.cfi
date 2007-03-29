@@ -6,5 +6,6 @@
        double HoleSaturationVelocity = 8.37e6
        double HoleBeta = 1.213
        double HoleRHAllParameter = 0.7
+	bool UseCalibrationFromDB =false
         }
 
