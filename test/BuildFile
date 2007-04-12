@@ -10,7 +10,7 @@
 
 
 <library file="*.cc" name=RecoLocalTrackerSiStripRecHitConverterTestModules>
-<flags  SEAL_PLUGIN_NAME="RecoLocalTrackerSiStripRecHitConverterTestModules">
+<flags EDM_PLUGIN=1>
 </library>
 
 
