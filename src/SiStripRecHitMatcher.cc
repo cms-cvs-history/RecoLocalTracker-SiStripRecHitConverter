@@ -1,7 +1,6 @@
 // File: SiStripRecHitMatcher.cc
 // Description:  Matches into rechits
 // Author:  C.Genta
-
 #include "RecoLocalTracker/SiStripRecHitConverter/interface/SiStripRecHitMatcher.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
@@ -138,6 +137,14 @@ SiStripRecHitMatcher::match( const  SiStripRecHit2D *monoRH,
     solution=solve(m,c);
     position=LocalPoint(solution(1),solution(2));
 
+
+    //
+    // temporary fix by tommaso
+    //
+
+
+    LocalError tempError (100,0,100);
+    if (!((gluedDet->surface()).bounds().inside(position,tempError,scale_))) continue;                                                       
 
     // then calculate the error
     LocalVector  stereopositiononGluedendvector=projectedstripstereo.second-projectedstripstereo.first;
