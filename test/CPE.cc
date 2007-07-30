@@ -159,16 +159,15 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
   es.get<TrackerDigiGeometryRecord> ().get (pDD);
   const TrackerGeometry &tracker(*pDD);
   
-  const std::vector<DetId> detIDs = rechitsrphi->ids();
-  for ( std::vector<DetId>::const_iterator detunit_iterator = detIDs.begin(); detunit_iterator != detIDs.end(); detunit_iterator++ ) {//loop over detectors
-    unsigned int id = (*detunit_iterator).rawId();
+  for ( SiStripRecHit2DCollection::const_iterator detunit_iterator = rechitsrphi->begin(); 
+	detunit_iterator != rechitsrphi->end(); detunit_iterator++ ) {//loop over detectors
+    SiStripRecHit2DCollection::DetSet detset = *detunit_iterator;
+    unsigned int id = detset.id();
     edm::OwnVector<SiStripRecHit2D> collector; 
     if(id!=999999999){ //if is valid detector
-      SiStripRecHit2DCollection::range rechitRange = rechitsrphi->get((*detunit_iterator));
-      SiStripRecHit2DCollection::const_iterator rechitRangeIteratorBegin = rechitRange.first;
-      SiStripRecHit2DCollection::const_iterator rechitRangeIteratorEnd   = rechitRange.second;
-      SiStripRecHit2DCollection::const_iterator iter=rechitRangeIteratorBegin;
-      for(iter=rechitRangeIteratorBegin;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
+      SiStripRecHit2DCollection::DetSet::const_iterator iter=detset.begin()
+	SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = detset.end();
+      for(;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
 	//	  SiStripRecHit2D rechit=*iter;
 	const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=iter->cluster();
 	if (clust.isNonnull ()){
@@ -245,15 +244,15 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
   }
   
   //   const std::vector<DetId> detIDs = rechitsstereo->ids();
-  for ( std::vector<DetId>::const_iterator detunit_iterator = detIDs.begin(); detunit_iterator != detIDs.end(); detunit_iterator++ ) {//loop over detectors
-    unsigned int id = (*detunit_iterator).rawId();
+  for ( SiStripRecHit2DCollection::const_iterator detunit_iterator = rechitsrphi->begin(); 
+	detunit_iterator != rechitsrphi->end(); detunit_iterator++ ) {//loop over detectors
+    SiStripRecHit2DCollection::DetSet detset = *detunit_iterator;
+    unsigned int id = detset.id();
     edm::OwnVector<SiStripRecHit2D> collector; 
     if(id!=999999999){ //if is valid detector
-      SiStripRecHit2DCollection::range rechitRange = rechitsstereo->get((*detunit_iterator));
-      SiStripRecHit2DCollection::const_iterator rechitRangeIteratorBegin = rechitRange.first;
-      SiStripRecHit2DCollection::const_iterator rechitRangeIteratorEnd   = rechitRange.second;
-      SiStripRecHit2DCollection::const_iterator iter=rechitRangeIteratorBegin;
-      for(iter=rechitRangeIteratorBegin;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
+      SiStripRecHit2DCollection::DetSet::const_iterator iter=detset.begin()
+	SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = detset.end();
+      for(;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
 	//	  SiStripRecHit2D rechit=*iter;
 	const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=iter->cluster();
 	if (clust.isNonnull ()){
