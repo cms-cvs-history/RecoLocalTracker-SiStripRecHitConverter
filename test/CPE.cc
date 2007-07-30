@@ -188,7 +188,7 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
 	      
 	      //	      edm::LogInfo("CPE")<<"Match performed";
 	    LocalVector tkdir=closest.localDirection();
-	    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(*detunit_iterator);
+	    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(id);
 	    const StripTopology &topol=(StripTopology&)stripdet->topology();
 
 	    float thickness=stripdet->specificSurface().bounds().thickness();
