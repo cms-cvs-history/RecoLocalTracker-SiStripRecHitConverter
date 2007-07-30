@@ -165,8 +165,8 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
     unsigned int id = detset.id();
     edm::OwnVector<SiStripRecHit2D> collector; 
     if(id!=999999999){ //if is valid detector
-      SiStripRecHit2DCollection::DetSet::const_iterator iter=detset.begin()
-	SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = detset.end();
+      SiStripRecHit2DCollection::DetSet::const_iterator iter=detset.begin();
+      SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = detset.end();
       for(;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
 	//	  SiStripRecHit2D rechit=*iter;
 	const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=iter->cluster();
@@ -179,7 +179,7 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
 	    float mindist = 999999;
 	    PSimHit closest;
 	    for(std::vector<PSimHit>::const_iterator m=matched.begin(); m<matched.end(); m++){
-	      dist = abs((iter)->localPosition().x() - (*m).localPosition().x());
+	      dist = fabs((iter)->localPosition().x() - (*m).localPosition().x());
 	      if(dist<mindist){
 		mindist = dist;
 		closest = (*m);
@@ -250,8 +250,8 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
     unsigned int id = detset.id();
     edm::OwnVector<SiStripRecHit2D> collector; 
     if(id!=999999999){ //if is valid detector
-      SiStripRecHit2DCollection::DetSet::const_iterator iter=detset.begin()
-	SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = detset.end();
+      SiStripRecHit2DCollection::DetSet::const_iterator iter=detset.begin();
+      SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = detset.end();
       for(;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
 	//	  SiStripRecHit2D rechit=*iter;
 	const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=iter->cluster();
@@ -271,7 +271,7 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
 	    }
 	    //	    float resolution=iter->localPosition().x()- matched[0].localPosition().x();
 	    LocalVector tkdir=closest.localDirection();
-	    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(*detunit_iterator);
+	    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(id);
 	    const StripTopology &topol=(StripTopology&)stripdet->topology();
 	    //	    float resolution=topol.measurementPosition(iter->localPosition()).x()- topol.measurementPosition(closest.localPosition()).x();
 	    float thickness=stripdet->specificSurface().bounds().thickness();
