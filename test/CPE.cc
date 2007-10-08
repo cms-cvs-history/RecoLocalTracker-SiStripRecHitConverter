@@ -26,6 +26,8 @@
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHitFwd.h"
+
 
 CPE::CPE(edm::ParameterSet const& conf) : 
   conf_(conf)
