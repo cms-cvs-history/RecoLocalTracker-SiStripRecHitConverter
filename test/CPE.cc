@@ -172,7 +172,7 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
       SiStripRecHit2DCollection::const_iterator iter=rechitRangeIteratorBegin;
       for(iter=rechitRangeIteratorBegin;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
 	//	  SiStripRecHit2D rechit=*iter;
-	const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=iter->cluster();
+	SiStripRecHit2D::ClusterRef clust=iter->cluster();
 	if (clust.isNonnull ()){
 	  //edm::LogInfo("CPE")<<"The cluster is valid";
 	  std::vector<PSimHit> matched=associate.associateHit(*iter);
@@ -257,7 +257,7 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
       SiStripRecHit2DCollection::const_iterator iter=rechitRangeIteratorBegin;
       for(iter=rechitRangeIteratorBegin;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
 	//	  SiStripRecHit2D rechit=*iter;
-	const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=iter->cluster();
+	SiStripRecHit2D::ClusterRef clust=iter->cluster();
 	if (clust.isNonnull ()){
 	  std::vector<PSimHit> matched=associate.associateHit(*iter);
 	  edm::LogInfo("CPE")<<"matched size= "<<matched.size();
@@ -343,7 +343,7 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
       std::vector<SiStripRecHit2D*> rechits=getRecHitComponents(&(*tkrechit));
 	for(std::vector<SiStripRecHit2D*>::iterator ihit=rechits.begin();ihit!=rechits.end();++ihit){
 	  const SiStripRecHit2D* hit=*ihit;
-	  const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=hit->cluster();
+	  SiStripRecHit2D::ClusterRef clust=hit->cluster();
 	  if (clust.isNonnull ()){
 	    std::vector<PSimHit> matched=associate.associateHit((*hit));
 	    edm::LogInfo("CPE")<<"matched size= "<<matched.size();

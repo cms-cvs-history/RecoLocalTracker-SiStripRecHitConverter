@@ -352,7 +352,7 @@ namespace cms
 	  SiStripRecHit2D const rechit=*iterrphi;
 	  LocalPoint position=rechit.localPosition();
 	  //LocalError error=rechit.localPositionError();
-	  const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=rechit.cluster();
+	  SiStripRecHit2D::ClusterRef  clust=rechit.cluster();
 	  int clusiz=0;
 	  int totcharge=0;
 	  //	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
@@ -402,7 +402,7 @@ namespace cms
 	  SiStripRecHit2D const rechit=*itersas;
 	  LocalPoint position=rechit.localPosition();
 	  //	LocalError error=rechit.localPositionError();
-	  const edm::Ref<edm::DetSetVector<SiStripCluster>, SiStripCluster, edm::refhelper::FindForDetSetVector<SiStripCluster> > clust=rechit.cluster();
+	  SiStripRecHit2D::ClusterRef clust=rechit.cluster();
 	  int clusiz=0;
 	  int totcharge=0;
 	  //	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
