@@ -357,7 +357,8 @@ namespace cms
 	  int totcharge=0;
 	  //	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
 	    clusiz = clust->amplitudes().size();
-	    const std::vector<uint16_t> amplitudes=clust->amplitudes();
+	    //--replaced	    const std::vector<uint16_t> amplitudes=clust->amplitudes();
+	    const std::vector<edm::ProductStatus> amplitudes=clust->amplitudes();
 	    for(size_t ii=0; ii<amplitudes.size();ii++){
 	      totcharge+=amplitudes[ii];
 	    }
@@ -407,7 +408,8 @@ namespace cms
 	  int totcharge=0;
 	  //	  for(vector<const SiStripCluster*>::const_iterator ic = clust.begin(); ic!=clust.end(); ic++) {
 	    clusiz = clust->amplitudes().size();
-	    const std::vector<uint16_t> amplitudes=clust->amplitudes();
+	    //--replaced const std::vector<uint16_t> amplitudes=clust->amplitudes();
+	    const std::vector<edm::ProductStatus> amplitudes=clust->amplitudes();
 	    for(size_t i=0; i<amplitudes.size();i++){
 	      totcharge+=amplitudes[i];
 	    }
