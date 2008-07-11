@@ -21,6 +21,7 @@
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "TFile.h"
 #include "TProfile.h"
+#include "TH2F.h"
 #define NBINS 32
 
 class CPE : public edm::EDAnalyzer
@@ -39,25 +40,20 @@ class CPE : public edm::EDAnalyzer
 						const BoundPlane& plane);
 
   std::vector<SiStripRecHit2D*> getRecHitComponents(const TrackingRecHit* rechit);
-  TProfile *tibreshisto, *tobreshisto, *tiberrhisto, *toberrhisto;
-  TProfile *tidreshisto, *tecreshisto, *tiderrhisto, *tecerrhisto;
-  TProfile *mtibreshistox, *mtobreshistox, *mtidreshistox, *mtecreshistox;
-  TProfile *mtibreshistoy, *mtobreshistoy, *mtidreshistoy, *mtecreshistoy;
-  TProfile *tibsqrterrhisto, *tobsqrterrhisto, *tidsqrterrhisto, *tecsqrterrhisto;
-  TProfile *mtibsqrterrhistox, *mtobsqrterrhistox, *mtidsqrterrhistox, *mtecsqrterrhistox;
-  TProfile *mtibsqrterrhistoy, *mtobsqrterrhistoy, *mtidsqrterrhistoy, *mtecsqrterrhistoy;
-  TProfile *mtibtksqrterrhistox, *mtobtksqrterrhistox, *mtidtksqrterrhistox, *mtectksqrterrhistox;
-  TProfile *mtibtksqrterrhistoy, *mtobtksqrterrhistoy, *mtidtksqrterrhistoy, *mtectksqrterrhistoy;
-  TProfile *tibtkreshisto, *tobtkreshisto, *tibtkerrhisto, *tobtkerrhisto;
-  TFile *myfile_;
+
+  //  TFile *myfile_;
   TH1F *tibproj, *tobproj, *tibres[NBINS], *tobres[NBINS], *tiberr, *toberr;
   TH1F *tidres[NBINS], *tecres[NBINS];
-  TH1F *mtibproj, *mtobproj, *mtibres[NBINS], *mtobres[NBINS];
-  TH1F *mtibresx, *mtobresx, *mtidresx, *mtecresx;
-  TH1F *mtibresy, *mtobresy, *mtidresy, *mtecresy;
-  TH1F *mtidres[NBINS], *mtecres[NBINS];
-  TH1F *mtidres_y[NBINS], *mtecres_y[NBINS], *mtibres_y[NBINS], *mtobres_y[NBINS];
+  TH1F *tibres1[NBINS], *tobres1[NBINS], *tidres1[NBINS], *tecres1[NBINS];
+  TH1F *tibres2[NBINS], *tobres2[NBINS], *tidres2[NBINS], *tecres2[NBINS];
+  TH1F *tibres3[NBINS], *tobres3[NBINS], *tidres3[NBINS], *tecres3[NBINS];
+  TH1F *tibres4[NBINS], *tobres4[NBINS], *tidres4[NBINS], *tecres4[NBINS];
+  TH1F *tibres5[NBINS], *tobres5[NBINS], *tidres5[NBINS], *tecres5[NBINS];
+  TH1F *tibres6[NBINS], *tobres6[NBINS], *tidres6[NBINS], *tecres6[NBINS];
+  TH1F *tibreswc[NBINS], *tobreswc[NBINS],*tidreswc[NBINS], *tecreswc[NBINS];
   TH1F *tibtkproj, *tobtkproj, *tibtkres, *tobtkres, *tibtkerr, *tobtkerr;
+
+
  private:
   edm::ParameterSet conf_;
 };

@@ -5,6 +5,8 @@
 <use name=SimDataFormats/TrackerDigiSimLink>
 <use name=SimTracker/TrackerHitAssociation>
 <use name=SimDataFormats/CrossingFrame>
+<use name=PhysicsTools/UtilAlgos>
+<use name=FWCore/ServiceRegistry>
 <use name=clhep>
 <use name=boost>
 <use name=root>
