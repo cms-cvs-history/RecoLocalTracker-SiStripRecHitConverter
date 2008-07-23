@@ -32,13 +32,13 @@ SiStripRecHitConverterAlgorithm::SiStripRecHitConverterAlgorithm(const edm::Para
 SiStripRecHitConverterAlgorithm::~SiStripRecHitConverterAlgorithm() {
 }
 
-void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::DetSetVector<SiStripCluster> >  input,SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher)
+void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::DetSetVector<SiStripCluster> >  input,SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher, const SiStripQuality *quality)
 {
-  run(input, outmatched,outrphi,outstereo,tracker,parameterestimator,matcher,LocalVector(0.,0.,0.));
+  run(input, outmatched,outrphi,outstereo,tracker,parameterestimator,matcher,LocalVector(0.,0.,0.),quality);
 }
 
 
-void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::DetSetVector<SiStripCluster> > inputhandle,SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher,LocalVector trackdirection)
+void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::DetSetVector<SiStripCluster> > inputhandle,SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher,LocalVector trackdirection, const SiStripQuality *quality)
 {
 
   int nmono=0;
@@ -55,7 +55,7 @@ void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::DetSetVector<SiStripC
       //get geometry 
       const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(detId);
       if(stripdet==0)edm::LogWarning("SiStripRecHitConverter")<<"Detid="<<id<<" not found, trying next one";
-      else{
+      else if ((quality == 0) || quality->IsModuleUsable(detId)) {
         edm::DetSet<SiStripCluster>::const_iterator begin=DSViter->data.begin();
         edm::DetSet<SiStripCluster>::const_iterator end  =DSViter->data.end();
         
@@ -103,7 +103,7 @@ void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::DetSetVector<SiStripC
   match(outmatched,outrphi,outstereo,tracker,matcher,trackdirection);
 }
 
-void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::SiStripRefGetter<SiStripCluster> >  refGetterhandle, edm::Handle<edm::SiStripLazyGetter<SiStripCluster> >  lazyGetterhandle, SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher)
+void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::SiStripRefGetter<SiStripCluster> >  refGetterhandle, edm::Handle<edm::SiStripLazyGetter<SiStripCluster> >  lazyGetterhandle, SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher, const SiStripQuality *quality)
 {
  
   int nmono=0;
@@ -126,7 +126,7 @@ void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::SiStripRefGetter<SiSt
 	  <<"Detid="
 	  <<icluster->geographicalId()
 	  <<" not found";
-      else{
+      else if ((quality == 0) || quality->IsModuleUsable(detId)) {
         
         StripSubdetector specDetId=StripSubdetector(icluster->geographicalId());
 	StripClusterParameterEstimator::LocalValues parameters=parameterestimator.localParameters(*icluster,*stripdet);
