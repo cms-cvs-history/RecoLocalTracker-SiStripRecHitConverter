@@ -9,6 +9,8 @@ module siStripMatchedRecHits = SiStripRecHitConverter{
     string matchedRecHits = "matchedRecHit"
     string rphiRecHits = "rphiRecHit"
     string stereoRecHits = "stereoRecHit"
+    bool   useSiStripQuality   = false
+    string siStripQualityLabel = "" 
 }
 
 
