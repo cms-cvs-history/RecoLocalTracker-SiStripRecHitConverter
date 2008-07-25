@@ -11,6 +11,7 @@ module siStripMatchedRecHits = SiStripRecHitConverter{
     string stereoRecHits = "stereoRecHit"
     bool   useSiStripQuality   = false
     string siStripQualityLabel = "" 
+    bool   MaskBadAPVFibers    = false
 }
 
 
