@@ -1,5 +1,0 @@
-  module clusterfilter= ClusterFilter{
-      string ClusterProducer = "siStripClusters"
-      int32 maxClusters= 1000000
-
-  }
