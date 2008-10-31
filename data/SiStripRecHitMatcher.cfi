@@ -1,5 +1,0 @@
-       es_module = SiStripRecHitMatcherESProducer {
-                string ComponentName = "StandardMatcher"
-		double NSigmaInside = 3.
-        }
-
