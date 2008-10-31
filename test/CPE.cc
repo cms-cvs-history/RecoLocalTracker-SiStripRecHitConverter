@@ -140,16 +140,15 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
 
   
 
-  const std::vector<DetId> detIDs = rechitsrphi->ids();
-  for ( std::vector<DetId>::const_iterator detunit_iterator = detIDs.begin(); detunit_iterator != detIDs.end(); detunit_iterator++ ) {//loop over detectors
-    unsigned int id = (*detunit_iterator).rawId();
+  for (SiStripRecHit2DCollection::const_iterator detunit_iterator = rechitsrphi->begin(); detunit_iterator != rechitsrphi->end(); ++detunit_iterator) {
+    SiStripRecHit2DCollection::DetSet rechits = *detunit_iterator; 
+    unsigned int id = rechits.detId();
     edm::OwnVector<SiStripRecHit2D> collector; 
-    SiStripRecHit2DCollection::range rechitRange = rechitsrphi->get((*detunit_iterator));
-    SiStripRecHit2DCollection::const_iterator rechitRangeIteratorBegin = rechitRange.first;
-    SiStripRecHit2DCollection::const_iterator rechitRangeIteratorEnd   = rechitRange.second;
-    SiStripRecHit2DCollection::const_iterator iter=rechitRangeIteratorBegin;
-    SiStripRecHit2DCollection::const_iterator iter2=rechitRangeIteratorBegin;
-    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(*detunit_iterator);
+    SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorBegin = rechits.begin();
+    SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = rechits.end();
+    SiStripRecHit2DCollection::DetSet::const_iterator iter=rechitRangeIteratorBegin;
+    SiStripRecHit2DCollection::DetSet::const_iterator iter2=rechitRangeIteratorBegin;
+    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(rechits.detId());
     const StripTopology &topol=(StripTopology&)stripdet->topology();
     //    std::cout<<"DetId= "<<id<<std::endl;
     for(iter=rechitRangeIteratorBegin;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
@@ -256,15 +255,14 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
     }
   }
   
-  //   const std::vector<DetId> detIDs = rechitsstereo->ids();
-  for ( std::vector<DetId>::const_iterator detunit_iterator = detIDs.begin(); detunit_iterator != detIDs.end(); detunit_iterator++ ) {//loop over detectors
-    unsigned int id = (*detunit_iterator).rawId();
+  for (SiStripRecHit2DCollection::const_iterator detunit_iterator = rechitsstereo->begin(); detunit_iterator != rechitsstereo->end(); ++detunit_iterator) {
+    SiStripRecHit2DCollection::DetSet rechits = *detunit_iterator; 
+    unsigned int id = rechits.detId();
     edm::OwnVector<SiStripRecHit2D> collector; 
-    SiStripRecHit2DCollection::range rechitRange = rechitsstereo->get((*detunit_iterator));
-    SiStripRecHit2DCollection::const_iterator rechitRangeIteratorBegin = rechitRange.first;
-    SiStripRecHit2DCollection::const_iterator rechitRangeIteratorEnd   = rechitRange.second;
-    SiStripRecHit2DCollection::const_iterator iter=rechitRangeIteratorBegin;
-    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(*detunit_iterator);
+    SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorBegin = rechits.begin();
+    SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = rechits.end();
+    SiStripRecHit2DCollection::DetSet::const_iterator iter=rechitRangeIteratorBegin;
+    const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(rechits.detId());
     const StripTopology &topol=(StripTopology&)stripdet->topology();
     for(iter=rechitRangeIteratorBegin;iter!=rechitRangeIteratorEnd;++iter){//loop on the rechit
       //	  SiStripRecHit2D rechit=*iter;
