@@ -197,7 +197,8 @@ void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::RefGetter<SiStripClus
 
 
 void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo,const TrackerGeometry& tracker, const SiStripRecHitMatcher & matcher,LocalVector trackdirection) const {
-  
+  int maximumHits2BeforeMatching = conf_.getParameter<uint32_t>("maximumHits2BeforeMatching");
+  uint32_t skippedPairs = 0;
   int nmatch=0;
   
   std::vector<DetId> rphidetIDs = outrphi.ids();
@@ -224,25 +225,29 @@ void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & o
     SiStripRecHit2DCollection::const_iterator rhRangeIteratorBegin = monoRecHitRange.first;
     SiStripRecHit2DCollection::const_iterator rhRangeIteratorEnd   = monoRecHitRange.second;
     SiStripRecHit2DCollection::const_iterator iter;
-    
-    for(iter=rhRangeIteratorBegin;iter!=rhRangeIteratorEnd;++iter){//loop over the mono RH
-     
-      if (id>0){ //if the detector has a stereo det associated and at least an hit in the stereo detector
-	
-	const SiStripRecHit2DCollection::range rhpartnerRange = outstereo.get(theId);
-	SiStripRecHit2DCollection::const_iterator rhpartnerRangeIteratorBegin = rhpartnerRange.first;
-	SiStripRecHit2DCollection::const_iterator rhpartnerRangeIteratorEnd   = rhpartnerRange.second;
-      
-	const GluedGeomDet* gluedDet = (const GluedGeomDet*)tracker.idToDet(DetId(specDetId.glued()));
-	SiStripRecHitMatcher::SimpleHitCollection stereoHits;
-	stereoHits.reserve(rhpartnerRangeIteratorEnd-rhpartnerRangeIteratorBegin);
+    if (id>0){ //if the detector has a stereo det associated and at least an hit in the stereo detector
 
-	for (SiStripRecHit2DCollection::const_iterator i=rhpartnerRangeIteratorBegin; i != rhpartnerRangeIteratorEnd; ++i) {
-	  stereoHits.push_back( &(*i)); // convert to simple pointer
-	}
-	// perform the matchin looping over the hit on the stereo dets
-	matcher.match(&(*iter),stereoHits.begin(),stereoHits.end(),collectorMatched,gluedDet,trackdirection);
-	
+        const SiStripRecHit2DCollection::range rhpartnerRange = outstereo.get(theId);
+        SiStripRecHit2DCollection::const_iterator rhpartnerRangeIteratorBegin = rhpartnerRange.first;
+        SiStripRecHit2DCollection::const_iterator rhpartnerRangeIteratorEnd   = rhpartnerRange.second;
+        const GluedGeomDet* gluedDet = (const GluedGeomDet*)tracker.idToDet(DetId(specDetId.glued()));
+
+        if ((monoRecHitRange.second - monoRecHitRange.first) * (rhpartnerRange.second - rhpartnerRange.first) > maximumHits2BeforeMatching) {
+            skippedPairs++;
+            break;
+        }
+
+      for(iter=rhRangeIteratorBegin;iter!=rhRangeIteratorEnd;++iter){//loop over the mono RH
+     
+       SiStripRecHitMatcher::SimpleHitCollection stereoHits;
+       stereoHits.reserve(rhpartnerRangeIteratorEnd-rhpartnerRangeIteratorBegin);
+
+       for (SiStripRecHit2DCollection::const_iterator i=rhpartnerRangeIteratorBegin; i != rhpartnerRangeIteratorEnd; ++i) {
+         stereoHits.push_back( &(*i)); // convert to simple pointer
+       }
+       // perform the matchin looping over the hit on the stereo dets
+       matcher.match(&(*iter),stereoHits.begin(),stereoHits.end(),collectorMatched,gluedDet,trackdirection);
+            
       }
     }
     if (collectorMatched.size()>0){
@@ -256,6 +261,9 @@ void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & o
     << "found\n"	 
     << nmatch 
     << "  matched RecHits\n";
+  if (skippedPairs > 0) {
+    edm::LogWarning("SiStripRecHitConverter") << "Skipped matched rechits on " << skippedPairs << " modules.\n";
+  }
 }
 void SiStripRecHitConverterAlgorithm::fillBad128StripBlocks(const SiStripQuality &quality, const uint32_t &detid, bool bad128StripBlocks[6]) const {
     short badApvs   = quality.getBadApvs(detid);
