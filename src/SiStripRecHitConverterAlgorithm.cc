@@ -235,7 +235,8 @@ void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & o
 	SiStripRecHit2DCollection::const_iterator rhpartnerRangeIteratorBegin = rhpartnerRange.first;
 	SiStripRecHit2DCollection::const_iterator rhpartnerRangeIteratorEnd   = rhpartnerRange.second;
 
-        if ((monoRecHitRange.second - monoRecHitRange.first) * (rhpartnerRange.second - rhpartnerRange.first) > maximumHits2BeforeMatching) {
+        if ((maximumHits2BeforeMatching > 0) &&
+            (monoRecHitRange.second - monoRecHitRange.first) * (rhpartnerRange.second - rhpartnerRange.first) > maximumHits2BeforeMatching) {
             skippedPairs = true;
             break;
         }
