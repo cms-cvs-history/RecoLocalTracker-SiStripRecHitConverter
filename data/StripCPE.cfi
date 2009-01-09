@@ -1,4 +1,0 @@
-       es_module = StripCPEESProducer {
-                string ComponentName = "SimpleStripCPE"
-        }
-
