@@ -41,6 +41,8 @@ namespace cms
     produces<SiStripMatchedRecHit2DCollection>( matchedRecHitsTag_ );
     produces<SiStripRecHit2DCollection>( rphiRecHitsTag_ );
     produces<SiStripRecHit2DCollection>( stereoRecHitsTag_ );
+    produces<SiStripRecHit2DCollection>( rphiRecHitsTag_ + "Unmatched" );
+    produces<SiStripRecHit2DCollection>( stereoRecHitsTag_ + "Unmatched" );
   }
 
 
@@ -95,15 +97,19 @@ namespace cms
     std::auto_ptr<SiStripMatchedRecHit2DCollection> outputmatched(new SiStripMatchedRecHit2DCollection);
     std::auto_ptr<SiStripRecHit2DCollection> outputrphi(new SiStripRecHit2DCollection);
     std::auto_ptr<SiStripRecHit2DCollection> outputstereo(new SiStripRecHit2DCollection);
+    std::auto_ptr<SiStripRecHit2DCollection> outputrphiUnm(new SiStripRecHit2DCollection);
+    std::auto_ptr<SiStripRecHit2DCollection> outputstereoUnm(new SiStripRecHit2DCollection);
 
     // Step C: Invoke the seed finding algorithm
-    if (regional) recHitConverterAlgorithm_.run(refclusters,lazygetter,*outputmatched,*outputrphi,*outputstereo,tracker,stripcpe,rhmatcher,ptr_stripQuality);
-    else recHitConverterAlgorithm_.run(clusters,*outputmatched,*outputrphi,*outputstereo,tracker,stripcpe,rhmatcher,ptr_stripQuality);
+    if (regional) recHitConverterAlgorithm_.run(refclusters,lazygetter,*outputmatched,*outputrphi,*outputstereo,*outputrphiUnm,*outputstereoUnm,tracker,stripcpe,rhmatcher,ptr_stripQuality);
+    else recHitConverterAlgorithm_.run(clusters,*outputmatched,*outputrphi,*outputstereo,*outputrphiUnm,*outputstereoUnm,tracker,stripcpe,rhmatcher,ptr_stripQuality);
 
     // Step D: write output to file
     e.put(outputmatched, matchedRecHitsTag_ );
     e.put(outputrphi, rphiRecHitsTag_ );
+    e.put(outputrphiUnm, rphiRecHitsTag_ + "Unmatched" );
     e.put(outputstereo,stereoRecHitsTag_ );
+    e.put(outputstereoUnm,stereoRecHitsTag_ + "Unmatched" );
   }
 
 }
