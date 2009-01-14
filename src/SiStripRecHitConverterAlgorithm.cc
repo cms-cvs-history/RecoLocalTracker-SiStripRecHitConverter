@@ -35,13 +35,31 @@ SiStripRecHitConverterAlgorithm::SiStripRecHitConverterAlgorithm(const edm::Para
 SiStripRecHitConverterAlgorithm::~SiStripRecHitConverterAlgorithm() {
 }
 
-void SiStripRecHitConverterAlgorithm::run(edm::Handle<edmNew::DetSetVector<SiStripCluster> >  input,SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo, SiStripRecHit2DCollection & outrphiUnmatched, SiStripRecHit2DCollection & outstereoUnmatched,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher, const SiStripQuality *quality)
+void SiStripRecHitConverterAlgorithm::run(edm::Handle<edmNew::DetSetVector<SiStripCluster> >  input,
+					  SiStripMatchedRecHit2DCollection & outmatched,
+					  SiStripRecHit2DCollection & outrphi,
+					  SiStripRecHit2DCollection & outstereo, 
+					  SiStripRecHit2DCollection & outrphiUnmatched, 
+					  SiStripRecHit2DCollection & outstereoUnmatched,
+					  const TrackerGeometry& tracker,
+					  const StripClusterParameterEstimator &parameterestimator,
+					  const SiStripRecHitMatcher & matcher, const SiStripQuality *quality)
 {
   run(input, outmatched,outrphi,outstereo,outrphiUnmatched,outstereoUnmatched,tracker,parameterestimator,matcher,LocalVector(0.,0.,0.),quality);
 }
 
 
-void SiStripRecHitConverterAlgorithm::run(edm::Handle<edmNew::DetSetVector<SiStripCluster> > inputhandle,SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo, SiStripRecHit2DCollection & outrphiUnmatched, SiStripRecHit2DCollection & outstereoUnmatched,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher,LocalVector trackdirection, const SiStripQuality *quality)
+void SiStripRecHitConverterAlgorithm::run(edm::Handle<edmNew::DetSetVector<SiStripCluster> > inputhandle,
+					  SiStripMatchedRecHit2DCollection & outmatched,
+					  SiStripRecHit2DCollection & outrphi, 
+					  SiStripRecHit2DCollection & outstereo, 
+					  SiStripRecHit2DCollection & outrphiUnmatched,
+					  SiStripRecHit2DCollection & outstereoUnmatched,
+					  const TrackerGeometry& tracker,
+					  const StripClusterParameterEstimator &parameterestimator,
+					  const SiStripRecHitMatcher & matcher,
+					  LocalVector trackdirection, 
+					  const SiStripQuality *quality)
 {
 
   int nmono=0;
@@ -111,7 +129,17 @@ void SiStripRecHitConverterAlgorithm::run(edm::Handle<edmNew::DetSetVector<SiStr
   match(outmatched,outrphi,outstereo,outrphiUnmatched,outstereoUnmatched,tracker,matcher,trackdirection);
 }
 
-void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::RefGetter<SiStripCluster> >  refGetterhandle, edm::Handle<edm::LazyGetter<SiStripCluster> >  lazyGetterhandle, SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo, SiStripRecHit2DCollection & outrphiUnmatched, SiStripRecHit2DCollection & outstereoUnmatched,const TrackerGeometry& tracker,const StripClusterParameterEstimator &parameterestimator, const SiStripRecHitMatcher & matcher, const SiStripQuality *quality)
+void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::RefGetter<SiStripCluster> >  refGetterhandle, 
+					  edm::Handle<edm::LazyGetter<SiStripCluster> >  lazyGetterhandle,
+					  SiStripMatchedRecHit2DCollection & outmatched,
+					  SiStripRecHit2DCollection & outrphi, 
+					  SiStripRecHit2DCollection & outstereo, 
+					  SiStripRecHit2DCollection & outrphiUnmatched, 
+					  SiStripRecHit2DCollection & outstereoUnmatched,
+					  const TrackerGeometry& tracker,
+					  const StripClusterParameterEstimator &parameterestimator,
+					  const SiStripRecHitMatcher & matcher,
+					  const SiStripQuality *quality)
 {
  
   int nmono=0;
@@ -196,7 +224,14 @@ void SiStripRecHitConverterAlgorithm::run(edm::Handle<edm::RefGetter<SiStripClus
 }
 
 
-void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & outmatched,SiStripRecHit2DCollection & outrphi, SiStripRecHit2DCollection & outstereo, SiStripRecHit2DCollection & outrphiUnmatched, SiStripRecHit2DCollection & outstereoUnmatched,const TrackerGeometry& tracker, const SiStripRecHitMatcher & matcher,LocalVector trackdirection) const {
+void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & outmatched,
+					    SiStripRecHit2DCollection & outrphi, 
+					    SiStripRecHit2DCollection & outstereo,
+					    SiStripRecHit2DCollection & outrphiUnmatched,
+					    SiStripRecHit2DCollection & outstereoUnmatched,
+					    const TrackerGeometry& tracker,
+					    const SiStripRecHitMatcher & matcher,
+					    LocalVector trackdirection) const {
   int maximumHits2BeforeMatching = conf_.getParameter<uint32_t>("maximumHits2BeforeMatching");
   bool skippedPairs = false;
   
@@ -255,6 +290,10 @@ void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & o
 	matcher.match(&(*iter),stereoHits.begin(),stereoHits.end(),collectorMatched,gluedDet,trackdirection);
         if (collectorMatched.size() == before) collectorRphiUnMatched.push_back( iter->clone() );
 	
+      }else{
+	// the rphi sensor is not part of a glued module. Therefore its clusters cannot be matched to anything. 
+	// We can skip any check on the collection of matched hits;
+	collectorRphiUnMatched.push_back( iter->clone() );
       }
     }
     StripSubdetector stripDetId(*detunit_iterator);
@@ -281,8 +320,13 @@ void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & o
           }
           if (!collectorStereoUnMatched.empty()) outstereoUnmatched.put(theId, collectorStereoUnMatched.begin(), collectorStereoUnMatched.end());
       }
+    }else{
+      if (!collectorRphiUnMatched.empty()) outrphiUnmatched.put(stripDetId, collectorRphiUnMatched.begin(), collectorRphiUnMatched.end());      
     }
   }
+
+  /* Perhaps the following lines are redundant. 
+     For sure they are responsible for an exception at run time: "trying to insert duplicate entry"
   // now must check stereo detids for which there is no rphi detid
   for ( std::vector<DetId>::const_iterator stereoId = stereodetIDs.begin(); stereoId != stereodetIDs.end(); stereoId++ ) {
     SiStripRecHit2DCollection::range stereoRecHitRange = outstereo.get(*stereoId);
@@ -291,7 +335,9 @@ void SiStripRecHitConverterAlgorithm::match(SiStripMatchedRecHit2DCollection & o
        outstereoUnmatched.put(*stereoId, stereoRecHitRange.first, stereoRecHitRange.second); 
     }
   }
-  
+  */
+
+
   edm::LogInfo("SiStripRecHitConverter") 
     << "found\n"	 
     << nmatch 
