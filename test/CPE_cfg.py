@@ -17,7 +17,7 @@ process.load("Configuration.StandardSequences.MixingNoPileUp_cff")
 
 process.load("Configuration.StandardSequences.FakeConditions_cff")
 
-process.load("RecoTracker.TrackProducer.RefitterWithMaterial_cff")
+process.load("RecoTracker.TrackProducer.TrackRefitter_cff")
 
 process.load("RecoLocalTracker.SiStripRecHitConverter.StripCPEfromTrackAngle_cfi")
 
