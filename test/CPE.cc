@@ -147,7 +147,7 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
     SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorBegin = rechits.begin();
     SiStripRecHit2DCollection::DetSet::const_iterator rechitRangeIteratorEnd   = rechits.end();
     SiStripRecHit2DCollection::DetSet::const_iterator iter=rechitRangeIteratorBegin;
-    SiStripRecHit2DCollection::DetSet::const_iterator iter2=rechitRangeIteratorBegin;
+    //SiStripRecHit2DCollection::DetSet::const_iterator iter2=rechitRangeIteratorBegin;
     const StripGeomDetUnit * stripdet=(const StripGeomDetUnit*)tracker.idToDetUnit(rechits.detId());
     const StripTopology &topol=(StripTopology&)stripdet->topology();
     //    std::cout<<"DetId= "<<id<<std::endl;
@@ -179,8 +179,8 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
 	  //	      edm::LogInfo("CPE")<<"Match performed";
 	  LocalVector tkdir=closest.localDirection();
 	  
-	  float thickness=stripdet->specificSurface().bounds().thickness();
-	  float pitch=topol.localPitch(iter->localPosition());
+	  //float thickness=stripdet->specificSurface().bounds().thickness();
+	  //float pitch=topol.localPitch(iter->localPosition());
 	  //  float trackproj=tkdir.x()/tkdir.z()*thickness/pitch;
 	  LocalTrajectoryParameters tkparam= LocalTrajectoryParameters( closest.localPosition(),closest.localDirection(),0);
 	  float trackproj=uProj(stripdet,tkparam,(StripCPE *)&(*parameterestimator));
@@ -289,8 +289,8 @@ void CPE::analyze(const edm::Event& e, const edm::EventSetup& es)
 	  //	    float resolution=iter->localPosition().x()- matched[0].localPosition().x();
 	  LocalVector tkdir=closest.localDirection();
 	  //	    float resolution=topol.measurementPosition(iter->localPosition()).x()- topol.measurementPosition(closest.localPosition()).x();
-	  float thickness=stripdet->specificSurface().bounds().thickness();
-	  float pitch=topol.localPitch(iter->localPosition());
+	  //float thickness=stripdet->specificSurface().bounds().thickness();
+	  //float pitch=topol.localPitch(iter->localPosition());
 	  //	    float trackproj=tkdir.x()/tkdir.z()*thickness/pitch;
 	  LocalTrajectoryParameters tkparam= LocalTrajectoryParameters( closest.localPosition(),closest.localDirection(),0);
 	  float trackproj=uProj(stripdet,tkparam,(StripCPE *)&(*parameterestimator));
