@@ -46,7 +46,7 @@ CPE::CPE(edm::ParameterSet const& conf) :
 // Virtual destructor needed.
 CPE::~CPE() { }  
 
-void CPE::beginJob(const edm::EventSetup& c) {  
+void CPE::beginJob() {  
   //  myfile_= new TFile("resolution_QCD.root","RECREATE");
   edm::Service<TFileService> fs;
   tobproj=fs->make<TH1F>("TOBproj","TOB trackproj",12,0,12);

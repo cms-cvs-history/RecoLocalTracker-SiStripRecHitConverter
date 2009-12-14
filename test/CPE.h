@@ -31,7 +31,7 @@ class CPE : public edm::EDAnalyzer
   CPE(const edm::ParameterSet& conf);
   
   virtual ~CPE();
-  virtual void beginJob(const edm::EventSetup& c);
+  virtual void beginJob();
   virtual void endJob();
   virtual void analyze(const edm::Event& e, const edm::EventSetup& c);
 
