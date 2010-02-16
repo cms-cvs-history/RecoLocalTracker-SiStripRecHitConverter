@@ -34,7 +34,7 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('/store/relval/2008/6/22/RelVal-RelValQCD_Pt_50_80-1213987236-IDEAL_V2-2nd/0003/2613CED1-E340-DD11-98E7-000423D9880C.root')
 )
 
-process.CPEtest = cms.EDFilter("CPE",
+process.CPEtest = cms.EDAnalyzer("CPE",
     StripCPE = cms.string('StripCPEfromTrackAngle'),
     associatePixel = cms.bool(False),
     ROUList = cms.vstring('g4SimHitsTrackerHitsTIBLowTof', 
