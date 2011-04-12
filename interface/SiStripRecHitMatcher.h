@@ -230,7 +230,7 @@ void SiStripRecHitMatcher::doubleMatch(MonoIterator monoRHiter, MonoIterator mon
     }
   
 
-    Vec3F offset = trdir.basicVector().v * positiononGluedini.basicVector().v.get1(2)/trdir.basicVector().v.get1(2);
+    Vec3F offset = trdir.basicVector().v * positiononGluedini.basicVector().v.get1<2>()/trdir.basicVector().v.get1<2>();
     
     
     Vec3F ret1 = positiononGluedini.basicVector().v - offset;
@@ -283,7 +283,7 @@ void SiStripRecHitMatcher::doubleMatch(MonoIterator monoRHiter, MonoIterator mon
     LocalPoint positiononGluedini=gluedDetInvTrans.toLocal(globalpointini);
     LocalPoint positiononGluedend=gluedDetInvTrans.toLocal(globalpointend); 
     
-    Vec3F offset = trdir.basicVector().v * positiononGluedini.basicVector().v.get1(2)/trdir.basicVector().v.get1(2);
+    Vec3F offset = trdir.basicVector().v * positiononGluedini.basicVector().v.get1<2>()/trdir.basicVector().v.get1<2>();
     
     
     Vec3F projini= positiononGluedini.basicVector().v - offset;
@@ -315,9 +315,11 @@ void SiStripRecHitMatcher::doubleMatch(MonoIterator monoRHiter, MonoIterator mon
       double pitch=topol.localPitch(monoRH.localPositionFast());
       monoRH.setSigmaPitch(sigmap12=errormonoRH.uu()*pitch*pitch);
     }
+
     //float code
-    Vec3F scc1(s1, c1, c1, 0);
-    Vec3F ssc1(s1, s1, c1, 0);
+    float fc1(c1), fs1(s1);
+    Vec3F scc1(fs1, fc1, fc1, 0.f);
+    Vec3F ssc1(fs1, fs1, fc1, 0.f);
     Vec3F l1vec; l1vec.set1(l1);
     const Vec3F cslsimd = scc1 * ssc1 * l1vec;
     Vec3F sigmap12simd; sigmap12simd.set1(sigmap12);
@@ -340,11 +342,12 @@ void SiStripRecHitMatcher::doubleMatch(MonoIterator monoRHiter, MonoIterator mon
       double l2 = 1./(c2*c2+s2*s2);
       
       double diff=(c1*s2-c2*s1);
-      double invdet2 = 1/(diff*diff*l1*l2);
+      double invdet2 = 1./(diff*diff*l1*l2);
       
-      Vec3F invdet2simd(invdet2, -invdet2, invdet2, 0);
-      Vec3F ccssimd(s2, c2, c2, 0);
-      Vec3F csssimd(s2, s2, c2, 0);
+      float fc2(c2), fs2(s2), fid2(invdet2);	
+      Vec3F invdet2simd(fid2, -fid2, fid2, 0.f);
+      Vec3F ccssimd(fs2, fc2, fc2, 0.f);
+      Vec3F csssimd(fs2, fs2, fc2, 0.f);
       Vec3F l2simd; l2simd.set1(l2);
       Vec3F sigmap22simd; sigmap22simd.set1(si.sigmap22);
       Vec3F result = invdet2simd * (sigmap22simd * cslsimd + sigmap12simd * ccssimd * csssimd * l2simd);
