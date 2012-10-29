@@ -1,6 +1,6 @@
 #include "RecoLocalTracker/SiStripRecHitConverter/interface/StripCPE.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
-#include "Geometry/CommonTopologies/interface/TkRadialStripTopology.h"
+#include "Geometry/CommonTopologies/interface/RadialStripTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetType.h"
 #include "boost/bind.hpp"
 #include "boost/lambda/lambda.hpp"
@@ -68,7 +68,7 @@ localParameters( const SiStripCluster& cluster, const GeomDetUnit& det) const {
   StripCPE::Param const & p = param(det);
   const float barycenter = cluster.barycenter();
   const float fullProjection = p.coveredStrips( p.drift + LocalVector(0,0,-p.thickness), p.topology->localPosition(barycenter));
-  const float strip = barycenter - 0.5f * (1.f-shift[p.moduleGeom]) * fullProjection;
+  const float strip = barycenter - 0.5f * (1-shift[p.moduleGeom]) * fullProjection;
 
   return std::make_pair( p.topology->localPosition(strip),
 			 p.topology->localError(strip, 1.f/12.f) );
@@ -76,7 +76,9 @@ localParameters( const SiStripCluster& cluster, const GeomDetUnit& det) const {
 
 float StripCPE::Param::
 coveredStrips(const LocalVector& lvec, const LocalPoint& lpos) const {  
-  return topology->coveredStrips(lpos + 0.5f*lvec,lpos - 0.5f*lvec);
+  return 
+    ( topology->measurementPosition(lpos + 0.5f*lvec) 
+    - topology->measurementPosition(lpos - 0.5f*lvec)).x();
 }
 
 LocalVector StripCPE::
@@ -112,7 +114,7 @@ StripCPE::fillParams() {
     p.nstrips = p.topology->nstrips(); 
     p.moduleGeom = SiStripDetId(stripdet->geographicalId()).moduleGeometry();
     
-    const TkRadialStripTopology* rtop = dynamic_cast<const TkRadialStripTopology*>(&stripdet->specificType().specificTopology());
+    const RadialStripTopology* rtop = dynamic_cast<const RadialStripTopology*>(&stripdet->specificType().specificTopology());
     p.pitch_rel_err2 = (rtop) 
       ? pow( 0.5f * rtop->angularWidth() * rtop->stripLength()/rtop->localPitch(LocalPoint(0,0,0)), 2.f) / 12.f
       : 0.f;
